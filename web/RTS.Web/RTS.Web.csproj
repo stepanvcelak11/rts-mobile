@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+  <!-- Playable browser build: the same engine-free simulation compiled to WebAssembly, with a
+       canvas renderer, touch gestures and an HTML HUD (wwwroot/game.js). Deployed to GitHub Pages. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
+    <RootNamespace>RTS.Web</RootNamespace>
+    <AssemblyName>RTS.Web</AssemblyName>
+    <RunAOTCompilation Condition="'$(WasmAot)' == 'true'">true</RunAOTCompilation>
+    <WasmStripILAfterAOT Condition="'$(WasmAot)' == 'true'">true</WasmStripILAfterAOT>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.11" />
+    <ProjectReference Include="..\..\sim\RTS.Sim.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Assets\_Project\Resources\Data\**\*.json" LogicalName="Data/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Newtonsoft is reflection based; keep it whole when trimming. -->
+    <TrimmerRootAssembly Include="Newtonsoft.Json" />
+    <TrimmerRootAssembly Include="RTS.Sim" />
+  </ItemGroup>
+</Project>
