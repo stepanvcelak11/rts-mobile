@@ -1,0 +1,1 @@
+{ "name": "RTS.Data", "rootNamespace": "RTS.Data", "references": [], "noEngineReferences": true, "autoReferenced": true, "precompiledReferences": ["Newtonsoft.Json.dll"], "overrideReferences": true }

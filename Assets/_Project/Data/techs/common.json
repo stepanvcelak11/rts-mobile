@@ -1,0 +1,11 @@
+{ "items": [
+  { "id": "tech.veteran_infantry", "name": "Veteran Infantry", "kind": "tech", "age": "age.3",
+    "researchedAt": ["bld.barracks"], "cost": { "wood": 200, "gold": 200 }, "researchSeconds": 40,
+    "effects": [ { "target": "tag.infantry", "stat": "hp", "op": "mul", "value": 1.2 },
+                 { "target": "tag.infantry", "stat": "attacks.*.damage", "op": "mul", "value": 1.2 } ],
+    "prerequisites": [] },
+  { "id": "ship.3_villagers", "name": "3 Villagers", "kind": "shipment", "age": "age.1",
+    "effects": [], "spawns": [ { "id": "unit.villager", "count": 3 } ], "oncePerGame": false },
+  { "id": "ship.700_wood", "name": "700 Wood", "kind": "shipment", "age": "age.2",
+    "effects": [ { "target": "player", "stat": "stockpile.wood", "op": "add", "value": 700 } ], "spawns": [], "oncePerGame": false }
+]}

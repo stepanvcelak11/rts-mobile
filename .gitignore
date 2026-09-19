@@ -1,0 +1,23 @@
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+MemoryCaptures/
+*.csproj
+*.sln
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+.vs/
+.idea/
+# keep the headless sim project
+!sim/RTS.Sim.csproj
+!sim/RTS.Sim.Tests.csproj
+# dotnet
+sim/bin/
+sim/obj/
+__pycache__/

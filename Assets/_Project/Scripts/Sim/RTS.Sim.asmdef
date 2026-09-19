@@ -1,0 +1,1 @@
+{ "name": "RTS.Sim", "rootNamespace": "RTS.Sim", "references": ["RTS.Data"], "noEngineReferences": true, "autoReferenced": true }

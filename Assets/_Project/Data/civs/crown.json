@@ -1,0 +1,13 @@
+{
+  "id": "civ.crown", "name": "The Crown", "tagline": "Line infantry and cheap shipments", "color": "#3B82F6",
+  "startingUnits": [ { "id": "unit.villager", "count": 6 } ],
+  "startingStockpile": { "food": 200, "wood": 200, "gold": 100 },
+  "uniqueUnits": [], "uniqueBuildings": [], "replacements": {},
+  "modifiers": [
+    { "target": "tag.infantry", "stat": "hp", "op": "mul", "value": 1.10 },
+    { "target": "bld.house", "stat": "cost.wood", "op": "mul", "value": 0.80 },
+    { "target": "shipment", "stat": "xpCost", "op": "mul", "value": 0.90 }
+  ],
+  "homeCity": { "xpPerShipmentBase": 300, "xpGrowth": 1.25, "deck": ["ship.3_villagers", "ship.700_wood"], "deckSize": 8 },
+  "ai": { "buildOrder": "bo.crown_boom", "preferredComp": ["unit.musketeer", "unit.hussar"] }
+}

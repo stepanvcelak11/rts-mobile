@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "com.unity.render-pipelines.universal": "17.0.4",
+    "com.unity.inputsystem": "1.11.2",
+    "com.unity.burst": "1.8.18",
+    "com.unity.collections": "2.5.1",
+    "com.unity.addressables": "2.3.16",
+    "com.unity.nuget.newtonsoft-json": "3.2.1",
+    "com.unity.test-framework": "1.4.5",
+    "com.unity.ugui": "2.0.0",
+    "com.unity.adaptiveperformance": "5.1.1",
+    "com.unity.modules.animation": "1.0.0",
+    "com.unity.modules.audio": "1.0.0",
+    "com.unity.modules.physics": "1.0.0",
+    "com.unity.modules.uielements": "1.0.0",
+    "com.unity.modules.ui": "1.0.0"
+  }
+}

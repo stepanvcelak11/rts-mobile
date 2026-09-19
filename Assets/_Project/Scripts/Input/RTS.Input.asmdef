@@ -1,0 +1,1 @@
+{ "name": "RTS.Input", "rootNamespace": "RTS.Input", "references": ["RTS.Sim", "RTS.Data", "RTS.Net", "Unity.InputSystem"], "autoReferenced": true }

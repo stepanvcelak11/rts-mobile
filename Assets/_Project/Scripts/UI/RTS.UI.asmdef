@@ -1,0 +1,1 @@
+{ "name": "RTS.UI", "rootNamespace": "RTS.UI", "references": ["RTS.Sim", "RTS.Data", "RTS.Input", "RTS.Presentation"], "autoReferenced": true }
