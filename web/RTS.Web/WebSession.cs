@@ -62,6 +62,12 @@ public sealed class WebSession : IMatchSession
                     if (w.Positions.TryGet(ev.Entity, out Position pp))
                         Effects.Add(new[] { 2, (pp.Value.X * 64).RoundToInt(), (pp.Value.Y * 64).RoundToInt() });
                     break;
+                case SimEventKind.ResourceDeposited when w.Identities.TryGet(ev.Entity, out Identity vid) && vid.Player == LocalPlayer && ev.Amount >= Fix64.FromInt(5):
+                {
+                    FixVec2 at = w.TargetPoint(ev.B != 0 && w.Identities.Has(ev.B) ? ev.B : ev.Entity);
+                    Effects.Add(new[] { 3, (at.X * 64).RoundToInt(), (at.Y * 64).RoundToInt(), ev.A, ev.Amount.RoundToInt() });
+                    break;
+                }
                 case SimEventKind.ConstructionFinished when w.Identities.TryGet(ev.Entity, out Identity cid) && cid.Player == LocalPlayer:
                     Toasts.Add(w.BuildingDefOf(ev.Entity).Def.name + " completed");
                     break;

@@ -109,9 +109,22 @@ public sealed class WebController
         return true;
     }
 
+    private int NearestIdleVillager(FixVec2 to)
+    {
+        int best = 0; Fix64 bestD = Fix64.Zero;
+        for (int i = 0; i < W.Behaviours.Count; i++)
+        {
+            int e = W.Behaviours.EntityAt(i);
+            if (W.Identities.Get(e).Player != Me || !W.Cargos.Has(e) || W.Behaviours.At(i).State != UnitState.Idle) continue;
+            Fix64 d = (W.Positions.Get(e).Value - to).LengthSq;
+            if (best == 0 || d < bestD) { best = e; bestD = d; }
+        }
+        return best;
+    }
+
     // ---- gestures (map coordinates) -----------------------------------------------------------
 
-    /// <summary>Returns what happened: 0 nothing, 1 move, 2 attack, 3 gather, 4 select, 5 build placed, 6 repair, 7 attack-move, 8 deselect, 9 rally.</summary>
+    /// <summary>Returns what happened: 0 nothing, 1 move, 2 attack, 3 gather, 4 select, 5 build placed, 6 repair, 7 attack-move, 8 deselect, 9 rally, 10 nearest idle villager sent to gather.</summary>
     public int Tap(FixVec2 p, Fix64 pickRadius, int hitEntity = 0)
     {
         if (_mode == TapMode.Build) return TryPlaceBuilding(p) ? 5 : 0;
@@ -150,6 +163,14 @@ public sealed class WebController
             {
                 int[] gatherers = SelectedGatherers();
                 if (gatherers.Length > 0) { Submit(new GatherCommand(Me, gatherers, picked)); return 3; }
+                // Nothing useful selected: send the nearest idle villager instead of silently doing nothing.
+                int nearest = NearestIdleVillager(W.TargetPoint(picked));
+                if (nearest != 0 && SelectedSoldiers().Length == 0)
+                {
+                    Select(new[] { nearest });
+                    Submit(new GatherCommand(Me, new[] { nearest }, picked));
+                    return 10;
+                }
                 _selection.Clear();
                 return 8;
             }

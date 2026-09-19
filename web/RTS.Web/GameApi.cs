@@ -147,7 +147,7 @@ public static partial class GameApi
     /// Advances the simulation by dt seconds and returns the draw list:
     /// header[16] = count, tick, winner, ghostVisible, ghostX, ghostY, ghostW, ghostH, ghostValid, effectCount, pingX, pingY, fogChanged, rallyX, rallyY, reserved
     /// then per entity 12 ints: kind, id, x, y, player, def, sizeA, sizeB, hp%, flags, facingDeg, state
-    /// then per effect 3 ints: kind, x, y.  Positions/sizes are ×64. Enemies hidden by fog are omitted.
+    /// then per effect 5 ints: kind, x, y, a, b (kind 3 = deposit: a = resource, b = amount).  Positions/sizes are ×64. Enemies hidden by fog are omitted.
     /// </summary>
     [JSExport]
     [return: JSMarshalAs<JSType.Array<JSType.Number>>]
@@ -241,7 +241,7 @@ public static partial class GameApi
             _buf[4] = c.GhostX * Scale; _buf[5] = c.GhostY * Scale; _buf[6] = b.W * Scale; _buf[7] = b.H * Scale; _buf[8] = c.GhostValid ? 1 : 0;
         }
         _buf[9] = _s.Effects.Count;
-        foreach (int[] fx in _s.Effects) { _buf.Add(fx[0]); _buf.Add(fx[1]); _buf.Add(fx[2]); }
+        foreach (int[] fx in _s.Effects) { _buf.Add(fx[0]); _buf.Add(fx[1]); _buf.Add(fx[2]); _buf.Add(fx.Length > 3 ? fx[3] : 0); _buf.Add(fx.Length > 4 ? fx[4] : 0); }
         _s.Effects.Clear();
         if (_s.AttackPing.HasValue && _s.Clock < _s.AttackPingUntil)
         {
@@ -271,6 +271,30 @@ public static partial class GameApi
     }
 
     // ---- fog of war ---------------------------------------------------------------------------
+
+    /// <summary>Nearest explored, non-depleted node (or own mill) yielding <paramref name="resource"/>, measured from the selection.</summary>
+    private static int NearestNode(World w, WebController c, int resource, out FixVec2 at)
+    {
+        at = default;
+        if (c.Selection.Count == 0 || !w.IsAlive(c.Selection[0])) return 0;
+        FixVec2 from = w.TargetPoint(c.Selection[0]);
+        int best = 0; Fix64 bestD = Fix64.Zero;
+        for (int i = 0; i < w.Nodes.Count; i++)
+        {
+            int e = w.Nodes.EntityAt(i);
+            ResourceNode n = w.Nodes.At(i);
+            if (n.Resource != resource || n.IsDepleted) continue;
+            if (!w.Identities.TryGet(e, out Identity id)) continue;
+            if (id.Kind == EntityKind.Building && id.Player != _s.LocalPlayer) continue;   // only own mills
+            if (id.Kind == EntityKind.Building && w.Constructions.Has(e)) continue;
+            FixVec2 p = w.TargetPoint(e);
+            int cx = Math.Clamp(p.X.FloorToInt(), 0, w.Map.Width - 1), cy = Math.Clamp(p.Y.FloorToInt(), 0, w.Map.Height - 1);
+            if (_fog != null && _fog[cy * w.Map.Width + cx] == 0) continue;
+            Fix64 d = (p - from).LengthSq;
+            if (best == 0 || d < bestD) { best = e; bestD = d; at = p; }
+        }
+        return best;
+    }
 
     private static void UpdateFog()
     {
@@ -380,12 +404,22 @@ public static partial class GameApi
             case "selectarmy": c.SelectAll(soldiers: true); break;
             case "selectvillagers": c.SelectAll(soldiers: false); break;
             case "stance": { int[] u = c.SelectedUnits(); if (u.Length > 0) c.Submit(new StanceCommand(me, u, (Stance)arg)); break; }
+            case "gathernear":
+            {
+                int[] g = c.SelectedGatherers();
+                if (g.Length == 0) { _s.Toasts.Add("Select villagers first"); break; }
+                int node = NearestNode(w, c, arg, out FixVec2 np);
+                if (node == 0) { _s.Toasts.Add("No " + new[] { "food", "wood", "gold" }[Math.Clamp(arg, 0, 2)] + " source explored yet"); break; }
+                c.Submit(new GatherCommand(me, g, node));
+                return "{\"x\":" + Num(np.X) + ",\"y\":" + Num(np.Y) + ",\"gather\":1}";
+            }
             case "train": { int b = c.SelectedBuilding(); if (b != 0) c.Submit(new TrainCommand(me, b, arg)); break; }
             case "train5": { int b = c.SelectedBuilding(); if (b != 0) for (int k = 0; k < 5; k++) c.Submit(new TrainCommand(me, b, arg)); break; }
             case "research": { int b = c.SelectedBuilding(); if (b != 0) c.Submit(new ResearchCommand(me, b, arg)); break; }
             case "ageup": { int b = c.SelectedBuilding(); if (b != 0) c.Submit(new AgeUpCommand(me, b, arg)); break; }
             case "cancel": { int b = c.SelectedBuilding(); if (b != 0) c.Submit(new CancelCommand(me, b)); break; }
             case "clearrally": { int b = c.SelectedBuilding(); if (b != 0) c.Submit(new RallyCommand(me, b, FixVec2.Zero, clear: true)); break; }
+            case "deselect": c.Select(Array.Empty<int>()); break;
             case "buy": c.Submit(new TradeCommand(me, arg, buy: true)); break;
             case "sell": c.Submit(new TradeCommand(me, arg, buy: false)); break;
             case "ship": c.Submit(new ShipmentCommand(me, arg)); break;
@@ -474,6 +508,15 @@ public static partial class GameApi
                 label = units.Length == 1 ? UnitLabel(w, units[0]) : units.Length + " units";
                 if (units.Length == 1) stance = (int)w.Behaviours.Get(units[0]).Stance;
                 else if (units.Length > 1) { stance = (int)w.Behaviours.Get(units[0]).Stance; foreach (int u in units) if ((int)w.Behaviours.Get(u).Stance != stance) { stance = -2; break; } }
+                if (c.SelectedGatherers().Length > 0)
+                {
+                    string[] resNames = { "Food", "Wood", "Gold" };
+                    for (int r = 0; r < 3; r++)
+                    {
+                        int node = NearestNode(w, c, r, out _);
+                        actions.Add(("gathernear:" + r, "Gather " + resNames[r].ToLowerInvariant(), node != 0, "gather", "res-" + r, "Send the selected villagers to the nearest explored " + resNames[r].ToLowerInvariant() + " source"));
+                    }
+                }
                 if (c.SelectedBuilders().Length > 0)
                     for (int i = 0; i < defs.Buildings.Length; i++)
                     {

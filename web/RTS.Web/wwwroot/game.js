@@ -1,7 +1,8 @@
 // Browser client for the RTS: boot, lobby, input gestures, HUD and the frame loop.
 // All rules live in the .NET simulation (GameApi exports); render.js draws, sfx.js beeps.
-import { Renderer, iconFor, PLAYER, setCivColors } from "./render.js";
-import { sfx, unlock, setMuted, isMuted } from "./sfx.js";
+import { Renderer, iconFor, PLAYER, setCivColors } from "./render.js?v=dev";
+import { sfx, unlock, setMuted, isMuted } from "./sfx.js?v=dev";
+const BUILD = "dev";
 
 const S = 64;
 const $ = (id) => document.getElementById(id);
@@ -28,6 +29,7 @@ async function boot() {
   const runtime = await globalThis.getDotnetRuntime(0);
   api = (await runtime.getAssemblyExports("RTS.Web.dll")).RTS.Web.GameApi;
   defs = JSON.parse(api.Defs());
+  $("version").textContent = "build " + BUILD;
   buildMenu();
 }
 
@@ -115,7 +117,7 @@ function frame(now) {
   if (now - miniAt > 250) { miniAt = now; R.drawMinimap(mini, R.lastEnts || [], 0); }
   // sounds for effects
   const n = buf[9]; let o = 16 + buf[0] * 12;
-  for (let i = 0; i < n; i++, o += 3) { if (buf[o] === 1) sfx.death(); else if (i < 2) sfx.hit(); }
+  for (let i = 0; i < n; i++, o += 5) { if (buf[o] === 1) sfx.death(); else if (buf[o] === 2 && i < 2) sfx.hit(); }
   requestAnimationFrame(frame);
 }
 
@@ -178,14 +180,14 @@ function endPointer(ev) {
   if (pointers.size < 2) pinchDist = 0;
   if (!gesture || gesture.id !== ev.pointerId) return;
   clearTimeout(gesture.timer);
-  if (gesture.mode === "touch") {
+  if (gesture.mode === "touch" && ev.type !== "pointercancel") {
     const [wx, wy] = R.toWorld(ev.clientX, ev.clientY);
     const hit = R.hitTest(ev.clientX, ev.clientY);
     const code = api.Tap(wx, wy, 26 / R.cam.zoom, hit);
     feedback(code, wx, wy);
   } else if (gesture.mode === "box") {
     const x0 = Math.min(gesture.sx, ev.clientX), x1 = Math.max(gesture.sx, ev.clientX), y0 = Math.min(gesture.sy, ev.clientY), y1 = Math.max(gesture.sy, ev.clientY);
-    if (x1 - x0 > 6 || y1 - y0 > 6) { const ids = R.entitiesInScreenRect(x0, y0, x1, y1); if (ids.length) { api.SelectEntities(ids); sfx.select(); pollHud(); } }
+    if (x1 - x0 > 6 || y1 - y0 > 6) { const ids = R.entitiesInScreenRect(x0, y0, x1, y1); if (ids.length) { api.SelectEntities(ids); R.everSelected = true; sfx.select(); pollHud(); } }
   }
   gesture = null;
   $("box").classList.add("hidden");
@@ -208,6 +210,7 @@ window.addEventListener("keydown", (ev) => {
 });
 
 function feedback(code, wx, wy) {
+  if (code === 4) R.everSelected = true;
   switch (code) {
     case 1: R.addMarker("move", wx, wy); sfx.move(); break;
     case 2: R.addMarker("attack", wx, wy); sfx.attack(); break;
@@ -217,6 +220,8 @@ function feedback(code, wx, wy) {
     case 6: R.addMarker("build", wx, wy); sfx.build(); break;
     case 7: R.addMarker("attack", wx, wy); sfx.attack(); break;
     case 9: R.addMarker("move", wx, wy); sfx.click(); break;
+    case 8: toast("Tap a villager first, then tap the resource"); break;
+    case 10: R.everSelected = true; R.addMarker("gather", wx, wy); sfx.gather(); toast("Nearest idle villager sent to gather"); break;
     default: break;
   }
   pollHud();
@@ -298,7 +303,12 @@ function addAction(parent, a) {
   const [name, cost] = a.label.split("|");
   b.innerHTML = (a.icon ? `<img src="${iconFor(a.icon, defs)}" alt="">` : "") + `<span class="name">${name}</span>` + (cost ? `<span class="cost">${cost}</span>` : "");
   const [act, arg] = a.id.split(":");
-  b.onclick = () => { if (tipShown) { hideTip(); return; } api.Action(act, arg ? parseInt(arg, 10) : 0); sfx.click(); pollHud(); };
+  b.onclick = () => {
+    if (tipShown) { hideTip(); return; }
+    const res = api.Action(act, arg ? parseInt(arg, 10) : 0);
+    if (res && res[0] === "{") { const r = JSON.parse(res); if (r.gather) { R.addMarker("gather", r.x, r.y); sfx.gather(); pollHud(); return; } }
+    sfx.click(); pollHud();
+  };
   attachTip(b, a.tip ? (name + " — " + a.tip) : "");
   parent.appendChild(b);
 }

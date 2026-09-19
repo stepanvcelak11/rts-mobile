@@ -50,6 +50,7 @@ python tools/check_deps.py                      # Sim/Data/Net stay engine-free
 ```
 dotnet publish web/RTS.Web/RTS.Web.csproj -c Release -o web-dist
 python tools/smoke_web.py            # headless Playwright: boots, plays, checks for JS errors
+python tools/play_test.py [URL]      # touch taps like a person; asserts food/wood/gold actually grow
 ```
 `web/RTS.Web` hosts the simulation in Blazor WebAssembly; `wwwroot/game.js` (input + HUD),
 `render.js` (isometric renderer, procedural sprites, fog) and `sfx.js` (WebAudio) are the client. Pushes to `main` run the tests and deploy to GitHub Pages
@@ -88,5 +89,5 @@ Assets/_Project/
   Tests/EditMode/Sim  NUnit tests (run in Unity Test Runner or via sim/tests)
 sim/                  csproj files for dotnet build/test
 web/RTS.Web           browser build (Blazor WASM host + canvas renderer)
-tools/                gen_data.py, validate_data.py, check_deps.py, smoke_web.py, serve_web.py
+tools/                gen_data.py, validate_data.py, check_deps.py, smoke_web.py, play_test.py, serve_web.py
 ```

@@ -123,6 +123,7 @@ export class Renderer {
     this.drawMarkers(dt);
     this.drawEntities(ents);
     this.drawEffects(buf, ents, dt);
+    this.drawFloats(dt);
     this.drawFog();
     this.drawDayNight();
     this.drawBirds(dt);
@@ -402,6 +403,11 @@ export class Renderer {
       ctx.fillStyle = "rgba(255,220,120,0.9)"; ctx.beginPath(); ctx.arc(fx, fy, hw * 0.14, 0, Math.PI * 2); ctx.fill();
     }
     if (e.hp >= 0 && (e.hp < 100 || (e.flags & 1))) this.bar(sx, sy - dh - 4, Math.max(18, hw * 0.9), e.hp);
+    if (!this.everSelected && (e.flags & 4) && e.player === 0) {   // first-time hint: pulsing ring on villagers
+      const k = 0.5 + 0.5 * Math.sin(this.time * 4);
+      ctx.strokeStyle = `rgba(255,255,255,${0.35 + 0.5 * k})`; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(sx, sy, e.a * hw * (2.6 + k), e.a * hh * (2.6 + k), 0, 0, Math.PI * 2); ctx.stroke();
+    }
     if (e.state === 0 && (e.flags & 4) && e.player === 0) {   // idle villager marker
       ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.font = `${Math.max(9, hw * 0.35)}px system-ui`; ctx.textAlign = "center";
       ctx.fillText("z", sx + dw * 0.4, sy - dh - 2 + Math.sin(this.time * 3) * 2);
@@ -485,7 +491,11 @@ export class Renderer {
   drawEffects(buf, ents, dt) {
     const n = buf[9];
     let o = 16 + buf[0] * 12;
-    for (let i = 0; i < n; i++, o += 3) this.effects.push({ kind: buf[o], x: buf[o + 1] / 64, y: buf[o + 2] / 64, t: 0, seed: i * 7 + n });
+    for (let i = 0; i < n; i++, o += 5) {
+      if (buf[o] === 3) { const res = buf[o + 3], names = ["food", "wood", "gold"], cols = ["rgba(143,224,127,ALPHA)", "rgba(217,178,122,ALPHA)", "rgba(247,214,106,ALPHA)"];
+        this.addFloat(buf[o + 1] / 64, buf[o + 2] / 64, "+" + buf[o + 4] + " " + (names[res] || ""), cols[res] || "rgba(255,255,255,ALPHA)"); continue; }
+      this.effects.push({ kind: buf[o], x: buf[o + 1] / 64, y: buf[o + 2] / 64, t: 0, seed: i * 7 + n });
+    }
     this.effects = this.effects.filter(f => (f.t += dt) < 0.7);
     const ctx = this.ctx, hw = this.hw, hh = this.hh;
     for (const f of this.effects) {
@@ -565,12 +575,35 @@ export class Renderer {
   /// The entity whose sprite is under a screen point (nearest to the viewer wins; units before buildings).
   hitTest(sx, sy) {
     if (!this.hitRects) return 0;
-    let best = null;
+    // Score by how central the tap is inside each sprite rect (0 = centre, 1 = edge); units get a
+    // small preference. If nothing contains the point, accept the nearest sprite within 22 px.
+    let best = null, bestScore = Infinity;
     for (const r of this.hitRects) {
-      if (sx < r.x0 || sx > r.x1 || sy < r.y0 || sy > r.y1) continue;
-      if (!best || r.kind === 1 && best.kind !== 1 || (r.kind === best.kind || best.kind !== 1) && r.depth < best.depth) best = r;
+      const cx = (r.x0 + r.x1) / 2, cy = (r.y0 + r.y1) / 2, hw = (r.x1 - r.x0) / 2, hh = (r.y1 - r.y0) / 2;
+      const d = Math.max(Math.abs(sx - cx) / Math.max(1, hw), Math.abs(sy - cy) / Math.max(1, hh));
+      const inside = d <= 1;
+      const slack = Math.max(Math.abs(sx - cx) - hw, Math.abs(sy - cy) - hh, 0);
+      if (!inside && slack > 22) continue;
+      const score = (inside ? d : 1 + slack / 22) - (r.kind === 1 ? 0.2 : 0) - (inside ? 0 : 0) + (r.kind === 2 ? 0.1 : 0);
+      if (score < bestScore) { bestScore = score; best = r; }
     }
     return best ? best.id : 0;
+  }
+
+  /// Floating "+10 wood" text over a drop-off.
+  addFloat(x, y, text, color) { this.floats = this.floats || []; this.floats.push({ x, y, text, color, t: 0 }); }
+
+  drawFloats(dt) {
+    if (!this.floats || !this.floats.length) return;
+    const ctx = this.ctx;
+    this.floats = this.floats.filter(f => (f.t += dt) < 1.4);
+    ctx.font = `bold ${Math.max(11, this.hw * 0.42)}px system-ui`; ctx.textAlign = "center";
+    for (const f of this.floats) {
+      const [sx, sy] = this.toScreen(f.x, f.y);
+      const k = f.t / 1.4;
+      ctx.fillStyle = `rgba(0,0,0,${0.6 * (1 - k)})`; ctx.fillText(f.text, sx + 1, sy - this.hh * 2 - k * 40 + 1);
+      ctx.fillStyle = f.color.replace("ALPHA", (1 - k).toFixed(2)); ctx.fillText(f.text, sx, sy - this.hh * 2 - k * 40);
+    }
   }
 
   /// Entities whose screen position lies inside a screen rect (box selection).
@@ -1040,6 +1073,9 @@ export function iconFor(key, defs) {
       case "rally": g.beginPath(); g.moveTo(12, 34); g.lineTo(12, 8); g.stroke(); g.beginPath(); g.moveTo(12, 8); g.lineTo(30, 13); g.lineTo(12, 18); g.fill(); break;
       case "tech": g.beginPath(); g.arc(20, 16, 8, 0, 7); g.stroke(); g.fillRect(16, 26, 8, 8); break;
       case "age": g.beginPath(); g.moveTo(8, 32); g.lineTo(20, 8); g.lineTo(32, 32); g.closePath(); g.stroke(); break;
+      case "res-0": g.fillStyle = "#8fe07f"; g.beginPath(); g.arc(20, 20, 13, 0, 7); g.fill(); g.fillStyle = "#c94b4b"; g.beginPath(); g.arc(14, 18, 3.5, 0, 7); g.arc(24, 15, 3.5, 0, 7); g.arc(21, 25, 3.5, 0, 7); g.fill(); break;
+      case "res-1": g.fillStyle = "#8a5a30"; g.fillRect(17, 22, 6, 12); g.fillStyle = "#9be08a"; g.beginPath(); g.moveTo(20, 4); g.lineTo(32, 22); g.lineTo(8, 22); g.closePath(); g.fill(); break;
+      case "res-2": g.fillStyle = "#f7d66a"; g.beginPath(); g.moveTo(20, 6); g.lineTo(33, 16); g.lineTo(28, 32); g.lineTo(12, 32); g.lineTo(7, 16); g.closePath(); g.fill(); break;
       case "stance-a": g.beginPath(); g.moveTo(10, 28); g.lineTo(20, 10); g.lineTo(30, 28); g.stroke(); break;
       case "stance-d": g.beginPath(); g.moveTo(20, 8); g.lineTo(32, 13); g.lineTo(28, 30); g.lineTo(20, 34); g.lineTo(12, 30); g.lineTo(8, 13); g.closePath(); g.stroke(); break;
       case "stance-s": g.beginPath(); g.arc(20, 20, 9, 0, 7); g.stroke(); g.beginPath(); g.moveTo(20, 6); g.lineTo(20, 34); g.moveTo(6, 20); g.lineTo(34, 20); g.stroke(); break;

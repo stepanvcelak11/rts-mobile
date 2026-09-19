@@ -54,6 +54,13 @@ Verified: 10-minute Hard-vs-Hard match is deterministic (same hash twice), 468 h
   Republic, Iberian Crown) each with a unique unit and passives, age-up choices (politicians),
   treasures guarded by wolves (wild player), lumber and mining camps, ×5 training, Expert AI
   with civ personalities (rush/boom), maps up to 160×160, day/night cycle, birds, building shadows.
+- Round 3 (gathering made foolproof): "Gather food / wood / gold" quick actions when villagers
+  are selected (nearest explored source), tapping a resource with nothing selected sends the
+  nearest idle villager, fat-finger sprite picking (nearest sprite within 22 px), floating
+  "+10 wood" texts at drop-off, pulsing hint ring on villagers until the first selection,
+  `pointercancel` never counts as a tap, `touch-action: none` on the canvas, build stamp in the
+  lobby + cache-busted assets (`?v=<sha>`), `tools/play_test.py` (real touch taps, asserts that
+  resources grow) run against the live site after every deploy.
 
 ## Next (Phase 6 candidates)
 - Formations and group speed matching; hierarchical pathfinding for 128×128+ maps.

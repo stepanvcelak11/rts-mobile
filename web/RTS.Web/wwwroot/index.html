@@ -8,7 +8,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <title>Two Rivers — mobile RTS</title>
   <base href="/" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=dev" />
 </head>
 <body>
   <canvas id="game"></canvas>
@@ -87,6 +87,7 @@
       </div>
       <button class="btn big" id="playBtn" disabled>Loading engine…</button>
       <button class="btn big neutral" id="helpBtn">How to play</button>
+      <p class="hint" id="version">build dev</p>
       <div id="help" class="hidden">
         <p><b>Tap</b> a unit to select it · tap the same unit again to grab all of its type nearby · <b>hold and drag</b> to box-select · <b>hold still</b> on the ground for the order wheel (Move / Attack) · <b>drag</b> to pan · <b>pinch</b> or wheel to zoom.</p>
         <p>With villagers selected, tap berries, trees, deer or a mine to gather; tap a mill to farm. Use the bottom bar to build. Select the Town Center to train villagers, research and <b>Age up</b>.</p>
@@ -98,6 +99,6 @@
   </div>
 
   <script src="_framework/blazor.webassembly.js" autostart="false"></script>
-  <script type="module" src="game.js"></script>
+  <script type="module" src="game.js?v=dev"></script>
 </body>
 </html>
