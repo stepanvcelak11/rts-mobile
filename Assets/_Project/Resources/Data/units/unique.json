@@ -180,6 +180,320 @@
         "scale": 1.0,
         "voiceSet": "vo.jaguar"
       }
+    },
+    {
+      "id": "unit.cuirassier",
+      "name": "Cuirassier",
+      "civ": "civ.lily",
+      "age": "age.2",
+      "trainedAt": [],
+      "cost": {
+        "food": 150,
+        "gold": 150
+      },
+      "trainSeconds": 45,
+      "population": 3,
+      "batchSize": 3,
+      "stats": {
+        "hp": 500,
+        "speed": 6.25,
+        "los": 12,
+        "armor": {
+          "melee": 0.3,
+          "ranged": 0.3,
+          "siege": 0
+        },
+        "sizeClass": "medium"
+      },
+      "attacks": [
+        {
+          "id": "melee",
+          "damage": 36,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {
+            "tag.villager": 2.0,
+            "tag.artillery": 3.0,
+            "tag.ranged": 1.5
+          }
+        }
+      ],
+      "tags": [
+        "tag.cavalry",
+        "tag.melee"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "aggressive",
+        "leashRange": 12,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Cuirassier",
+        "icon": "ui/units/cuirassier",
+        "scale": 1.0,
+        "voiceSet": "vo.cuirassier"
+      }
+    },
+    {
+      "id": "unit.strelets",
+      "name": "Strelets",
+      "civ": "civ.tsar",
+      "age": "age.2",
+      "trainedAt": [],
+      "cost": {
+        "food": 45,
+        "gold": 15
+      },
+      "trainSeconds": 24,
+      "population": 1,
+      "batchSize": 10,
+      "stats": {
+        "hp": 100,
+        "speed": 4.0,
+        "los": 12,
+        "armor": {
+          "melee": 0.2,
+          "ranged": 0,
+          "siege": 0
+        },
+        "sizeClass": "small"
+      },
+      "attacks": [
+        {
+          "id": "ranged",
+          "damage": 15,
+          "type": "ranged",
+          "range": 12,
+          "minRange": 0,
+          "cooldownSeconds": 3.0,
+          "projectile": "proj.bullet",
+          "multipliers": {
+            "tag.villager": 1.5
+          }
+        },
+        {
+          "id": "melee",
+          "damage": 9,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {
+            "tag.cavalry": 3.0
+          }
+        }
+      ],
+      "tags": [
+        "tag.infantry",
+        "tag.gunpowder"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "defensive",
+        "leashRange": 8,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Strelets",
+        "icon": "ui/units/strelets",
+        "scale": 1.0,
+        "voiceSet": "vo.strelets"
+      }
+    },
+    {
+      "id": "unit.janissary",
+      "name": "Janissary",
+      "civ": "civ.sultan",
+      "age": "age.2",
+      "trainedAt": [],
+      "cost": {
+        "food": 100,
+        "gold": 25
+      },
+      "trainSeconds": 34,
+      "population": 1,
+      "batchSize": 5,
+      "stats": {
+        "hp": 200,
+        "speed": 4.0,
+        "los": 12,
+        "armor": {
+          "melee": 0.2,
+          "ranged": 0,
+          "siege": 0
+        },
+        "sizeClass": "small"
+      },
+      "attacks": [
+        {
+          "id": "ranged",
+          "damage": 23,
+          "type": "ranged",
+          "range": 12,
+          "minRange": 0,
+          "cooldownSeconds": 3.0,
+          "projectile": "proj.bullet",
+          "multipliers": {
+            "tag.villager": 1.5
+          }
+        },
+        {
+          "id": "melee",
+          "damage": 16,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {
+            "tag.cavalry": 3.0
+          }
+        }
+      ],
+      "tags": [
+        "tag.infantry",
+        "tag.gunpowder"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "defensive",
+        "leashRange": 8,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Janissary",
+        "icon": "ui/units/janissary",
+        "scale": 1.0,
+        "voiceSet": "vo.janissary"
+      }
+    },
+    {
+      "id": "unit.ruyter",
+      "name": "Ruyter",
+      "civ": "civ.dutch",
+      "age": "age.3",
+      "trainedAt": [],
+      "cost": {
+        "food": 30,
+        "gold": 75
+      },
+      "trainSeconds": 32,
+      "population": 1,
+      "batchSize": 5,
+      "stats": {
+        "hp": 180,
+        "speed": 6.75,
+        "los": 14,
+        "armor": {
+          "melee": 0.2,
+          "ranged": 0.2,
+          "siege": 0
+        },
+        "sizeClass": "medium"
+      },
+      "attacks": [
+        {
+          "id": "ranged",
+          "damage": 15,
+          "type": "ranged",
+          "range": 12,
+          "minRange": 0,
+          "cooldownSeconds": 3.0,
+          "projectile": "proj.bullet",
+          "multipliers": {
+            "tag.cavalry": 3.0,
+            "tag.artillery": 2.0
+          }
+        },
+        {
+          "id": "melee",
+          "damage": 8,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {}
+        }
+      ],
+      "tags": [
+        "tag.cavalry",
+        "tag.ranged",
+        "tag.gunpowder"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "aggressive",
+        "leashRange": 12,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Ruyter",
+        "icon": "ui/units/ruyter",
+        "scale": 1.0,
+        "voiceSet": "vo.ruyter"
+      }
+    },
+    {
+      "id": "unit.rodelero",
+      "name": "Rodelero",
+      "civ": "civ.iberia",
+      "age": "age.2",
+      "trainedAt": [],
+      "cost": {
+        "food": 60,
+        "gold": 40
+      },
+      "trainSeconds": 28,
+      "population": 1,
+      "batchSize": 5,
+      "stats": {
+        "hp": 145,
+        "speed": 5.0,
+        "los": 10,
+        "armor": {
+          "melee": 0.3,
+          "ranged": 0.1,
+          "siege": 0
+        },
+        "sizeClass": "small"
+      },
+      "attacks": [
+        {
+          "id": "melee",
+          "damage": 17,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {
+            "tag.cavalry": 1.5,
+            "tag.building": 2.5
+          }
+        }
+      ],
+      "tags": [
+        "tag.infantry",
+        "tag.melee"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "defensive",
+        "leashRange": 9,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Rodelero",
+        "icon": "ui/units/rodelero",
+        "scale": 1.0,
+        "voiceSet": "vo.rodelero"
+      }
     }
   ]
 }

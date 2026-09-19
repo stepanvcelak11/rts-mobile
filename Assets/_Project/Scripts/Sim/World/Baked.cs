@@ -125,6 +125,7 @@ namespace RTS.Sim.Model
         public Fix64 RatePerTick;
         public int W, H;
         public bool Depletes;
+        public bool Treasure;
     }
 
     public sealed class BakedTech
@@ -319,6 +320,7 @@ namespace RTS.Sim.Model
                     W = n.FootprintW,
                     H = n.FootprintH,
                     Depletes = n.depletes,
+                    Treasure = n.treasure,
                 };
             }
 

@@ -1,0 +1,55 @@
+{
+  "items": [
+    {
+      "id": "unit.wolf",
+      "name": "Wolf",
+      "civ": "wild",
+      "age": "age.1",
+      "trainedAt": [],
+      "cost": {},
+      "trainSeconds": 0,
+      "population": 0,
+      "batchSize": 1,
+      "stats": {
+        "hp": 110,
+        "speed": 5.5,
+        "los": 8,
+        "armor": {
+          "melee": 0,
+          "ranged": 0,
+          "siege": 0
+        },
+        "sizeClass": "small"
+      },
+      "attacks": [
+        {
+          "id": "melee",
+          "damage": 12,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.2,
+          "multipliers": {
+            "tag.villager": 1.5
+          }
+        }
+      ],
+      "tags": [
+        "tag.animal"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "aggressive",
+        "leashRange": 6,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Wolf",
+        "icon": "ui/units/wolf",
+        "scale": 1.0,
+        "voiceSet": "vo.wolf"
+      }
+    }
+  ]
+}

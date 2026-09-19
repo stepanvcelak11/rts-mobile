@@ -1,24 +1,129 @@
 {
-  "resources": ["food", "wood", "gold"],
-  "startingStockpile": { "food": 200, "wood": 200, "gold": 100 },
+  "resources": [
+    "food",
+    "wood",
+    "gold"
+  ],
+  "startingStockpile": {
+    "food": 200,
+    "wood": 200,
+    "gold": 100
+  },
   "stockpileCap": 99999,
   "gatherRates": {
-    "res.berries": { "food": 0.67 },
-    "res.hunt":    { "food": 0.84 },
-    "res.farm":    { "food": 0.45 },
-    "res.tree":    { "wood": 0.50 },
-    "res.mine":    { "gold": 0.50 }
+    "res.berries": {
+      "food": 0.67
+    },
+    "res.hunt": {
+      "food": 0.84
+    },
+    "res.farm": {
+      "food": 0.45
+    },
+    "res.tree": {
+      "wood": 0.5
+    },
+    "res.mine": {
+      "gold": 0.5
+    },
+    "res.treasure_food": {
+      "food": 1
+    },
+    "res.treasure_wood": {
+      "wood": 1
+    },
+    "res.treasure_gold": {
+      "gold": 1
+    }
   },
   "carryCapacity": 10,
   "depositRadius": 1.5,
   "resourceNodes": [
-    { "id": "res.tree",    "amount": 300,  "footprint": [1, 1], "depletes": true, "regrowSeconds": 0 },
-    { "id": "res.berries", "amount": 1000, "footprint": [2, 2], "depletes": true },
-    { "id": "res.hunt",    "amount": 400,  "footprint": [1, 1], "depletes": true, "mobile": true, "fleeRange": 6 },
-    { "id": "res.mine",    "amount": 5000, "footprint": [3, 3], "depletes": true },
-    { "id": "res.farm",    "amount": -1,   "footprint": [3, 3], "depletes": false }
+    {
+      "id": "res.tree",
+      "amount": 300,
+      "footprint": [
+        1,
+        1
+      ],
+      "depletes": true,
+      "regrowSeconds": 0
+    },
+    {
+      "id": "res.berries",
+      "amount": 1000,
+      "footprint": [
+        2,
+        2
+      ],
+      "depletes": true
+    },
+    {
+      "id": "res.hunt",
+      "amount": 400,
+      "footprint": [
+        1,
+        1
+      ],
+      "depletes": true,
+      "mobile": true,
+      "fleeRange": 6
+    },
+    {
+      "id": "res.mine",
+      "amount": 5000,
+      "footprint": [
+        3,
+        3
+      ],
+      "depletes": true
+    },
+    {
+      "id": "res.farm",
+      "amount": -1,
+      "footprint": [
+        3,
+        3
+      ],
+      "depletes": false
+    },
+    {
+      "id": "res.treasure_food",
+      "amount": 150,
+      "footprint": [
+        1,
+        1
+      ],
+      "depletes": true,
+      "treasure": true
+    },
+    {
+      "id": "res.treasure_wood",
+      "amount": 150,
+      "footprint": [
+        1,
+        1
+      ],
+      "depletes": true,
+      "treasure": true
+    },
+    {
+      "id": "res.treasure_gold",
+      "amount": 150,
+      "footprint": [
+        1,
+        1
+      ],
+      "depletes": true,
+      "treasure": true
+    }
   ],
-  "market": { "enabled": true, "basePrice": 100, "priceStep": 3, "decayPerMinute": 4 },
+  "market": {
+    "enabled": true,
+    "basePrice": 100,
+    "priceStep": 3,
+    "decayPerMinute": 4
+  },
   "populationCapBase": 10,
   "populationCapMax": 200
 }

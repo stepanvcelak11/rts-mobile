@@ -143,10 +143,30 @@ namespace RTS.Sim.Systems
                 PlayerState ps = w.Players[p];
                 if (ps.AgeUpBuilding == 0) continue;
                 if (ps.AgeUpRemaining > 0) { ps.AgeUpRemaining--; continue; }
+                int building = ps.AgeUpBuilding;
                 ps.Age++;
                 ps.AgeUpBuilding = 0;
+                ApplyAgeChoice(w, ps, building);
                 w.Events.Add(new SimEvent(SimEventKind.AgeAdvanced, 0, p, ps.Age));
             }
+        }
+
+        private static void ApplyAgeChoice(World w, PlayerState ps, int building)
+        {
+            Data.AgeDef age = w.Defs.Ages[ps.Age].Def;
+            if (age.choices.Count == 0) return;
+            Data.AgeChoiceDef choice = age.choices[System.Math.Clamp(ps.AgeUpChoice, 0, age.choices.Count - 1)];
+            foreach (Data.ModifierDef m in choice.effects) ApplyModifierToPlayer(w, ps.Index, m);
+            foreach (var kv in choice.stockpile)
+                if (w.Defs.Data.TryResourceIndex(kv.Key, out int ri)) ps.Stockpile[ri] = FixMath.Min(ps.Stockpile[ri] + Fix64.FromDecimal(kv.Value), w.Defs.StockpileCap);
+            if (choice.spawns.Count > 0 && w.Footprints.TryGet(building, out Footprint fp))
+                foreach (Data.SpawnDef s in choice.spawns)
+                    if (w.Defs.Data.TryUnitIndex(s.id, out int ui))
+                    {
+                        ui = ps.Defs.Replace(ui);
+                        for (int k = 0; k < s.count; k++)
+                            if (w.Map.FindFreeCellAround(fp, 5, out FixVec2 at)) w.SpawnUnit(ui, ps.Index, at);
+                    }
         }
 
         /// <summary>Recomputes how many shipments each player can send from their XP.</summary>

@@ -49,6 +49,12 @@ Verified: 10-minute Hard-vs-Hard match is deterministic (same hash twice), 468 h
 - Sim: `MapGenerator` (Two Rivers, Great Plains, Highlands, Lakeland; 64/80/104), formations,
   stances, rally points, mill farm plots, market, skirmisher / dragoon / mortar, guard techs.
 
+- Round 2 (same day, after feedback): screen-space sprite picking (taps on tree crowns work),
+  8 civilizations (Crown, Iron Compact, Sun Empire, Lily Kingdom, Tsardom, Sultanate, Dutch
+  Republic, Iberian Crown) each with a unique unit and passives, age-up choices (politicians),
+  treasures guarded by wolves (wild player), lumber and mining camps, ×5 training, Expert AI
+  with civ personalities (rush/boom), maps up to 160×160, day/night cycle, birds, building shadows.
+
 ## Next (Phase 6 candidates)
 - Formations and group speed matching; hierarchical pathfinding for 128×128+ maps.
 - Lockstep `LockstepCommandSource` over a relay; desync reports from hash checkpoints.

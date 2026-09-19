@@ -30,9 +30,10 @@ plain .NET assembly with **no UnityEngine reference** — it also compiles as
 - [x] Phase 4 — 3 civilizations with unique units and passives, ages, techs, Home-City
       shipments, full mobile HUD (minimap, cards, queues, radial menu, box select)
 - [x] Phase 5 (web) — isometric renderer with procedural sprites, fog of war, generated maps
-      (4 types × 3 sizes), farms, market, stances, formations, rally points, 3 new unit lines,
-      objectives, tooltips, sound, pause/speed
-- 44 NUnit tests green, including AI-vs-AI determinism and replay playback
+      (4 types × 4 sizes up to 160×160), 8 civilizations with unique units, age-up choices,
+      guarded treasures, lumber/mining camps, farms, market, stances, formations, rally points,
+      batch training, objectives, tooltips, day/night, sound, pause/speed, Expert AI
+- 46 NUnit tests green, including AI-vs-AI determinism and replay playback
 
 ## Getting started
 

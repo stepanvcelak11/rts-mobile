@@ -1,6 +1,145 @@
-{ "items": [
-  { "id": "age.1", "name": "Discovery",  "cost": {} },
-  { "id": "age.2", "name": "Colonial",   "cost": { "food": 800 },                "researchSeconds": 60,  "at": "bld.towncenter" },
-  { "id": "age.3", "name": "Fortress",   "cost": { "food": 1200, "gold": 1000 }, "researchSeconds": 90,  "at": "bld.towncenter" },
-  { "id": "age.4", "name": "Industrial", "cost": { "food": 2000, "gold": 1200 }, "researchSeconds": 120, "at": "bld.towncenter" }
-]}
+{
+  "items": [
+    {
+      "id": "age.1",
+      "name": "Discovery",
+      "cost": {}
+    },
+    {
+      "id": "age.2",
+      "name": "Colonial",
+      "cost": {
+        "food": 800
+      },
+      "researchSeconds": 60,
+      "at": "bld.towncenter",
+      "choices": [
+        {
+          "id": "choice.naturalist",
+          "name": "The Naturalist",
+          "description": "+3 villagers arrive at the town center",
+          "spawns": [
+            {
+              "id": "unit.villager",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "id": "choice.quartermaster",
+          "name": "The Quartermaster",
+          "description": "+300 wood",
+          "stockpile": {
+            "wood": 300
+          }
+        },
+        {
+          "id": "choice.philosopher",
+          "name": "The Philosopher",
+          "description": "Villagers gather 8% faster",
+          "effects": [
+            {
+              "target": "*",
+              "stat": "gather.*",
+              "op": "mul",
+              "value": 1.08
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "age.3",
+      "name": "Fortress",
+      "cost": {
+        "food": 1200,
+        "gold": 1000
+      },
+      "researchSeconds": 90,
+      "at": "bld.towncenter",
+      "choices": [
+        {
+          "id": "choice.general",
+          "name": "The General",
+          "description": "5 musketeers arrive",
+          "spawns": [
+            {
+              "id": "unit.musketeer",
+              "count": 5
+            }
+          ]
+        },
+        {
+          "id": "choice.marksman",
+          "name": "The Marksman",
+          "description": "Infantry +10% damage",
+          "effects": [
+            {
+              "target": "tag.infantry",
+              "stat": "attacks.*.damage",
+              "op": "mul",
+              "value": 1.1
+            }
+          ]
+        },
+        {
+          "id": "choice.tycoon",
+          "name": "The Tycoon",
+          "description": "+600 gold",
+          "stockpile": {
+            "gold": 600
+          }
+        }
+      ]
+    },
+    {
+      "id": "age.4",
+      "name": "Industrial",
+      "cost": {
+        "food": 2000,
+        "gold": 1200
+      },
+      "researchSeconds": 120,
+      "at": "bld.towncenter",
+      "choices": [
+        {
+          "id": "choice.engineer",
+          "name": "The Engineer",
+          "description": "2 falconets arrive",
+          "spawns": [
+            {
+              "id": "unit.falconet",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "id": "choice.cavalier",
+          "name": "The Cavalier",
+          "description": "Cavalry +15% hp",
+          "effects": [
+            {
+              "target": "tag.cavalry",
+              "stat": "hp",
+              "op": "mul",
+              "value": 1.15
+            }
+          ]
+        },
+        {
+          "id": "choice.architect",
+          "name": "The Architect",
+          "description": "Buildings +25% hp",
+          "effects": [
+            {
+              "target": "tag.building",
+              "stat": "hp",
+              "op": "mul",
+              "value": 1.25
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

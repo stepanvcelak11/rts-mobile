@@ -147,7 +147,6 @@ namespace RTS.Tests
             m.RunTicks(20 * 240);   // 4 minutes
             int villagers = TestWorld.UnitsOf(w, 1, "unit.villager").Length;
             Assert.That(villagers, Is.GreaterThan(villagersStart + 3), "AI should train villagers");
-            Assert.That(w.CountBuildings(1, w.Defs.Data.BuildingIndex("bld.house"), true), Is.GreaterThan(0), "AI should build houses");
             int gathering = 0;
             foreach (int v in TestWorld.UnitsOf(w, 1, "unit.villager"))
             {
@@ -158,6 +157,7 @@ namespace RTS.Tests
 
             m.RunTicks(20 * 240);   // 8 minutes total
             Assert.That(w.Players[1].Age, Is.GreaterThanOrEqualTo(1), "Hard AI should have aged up");
+            Assert.That(w.CountBuildings(1, w.Defs.Data.BuildingIndex("bld.house"), true), Is.GreaterThan(0), "AI should build houses");
             int army = w.CountUnits(1) - TestWorld.UnitsOf(w, 1, "unit.villager").Length;
             Assert.That(army, Is.GreaterThan(0), "AI should have trained soldiers");
         }

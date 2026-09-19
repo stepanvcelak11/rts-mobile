@@ -159,6 +159,46 @@ namespace RTS.Tests
         }
 
         [Test]
+        public void Treasures_AreGuardedAndPickedUp()
+        {
+            var m = new MatchRunner(TestWorld.Data, Gen("greatPlains", 8), new LocalCommandSource());
+            World w = m.World;
+            var data = w.Defs.Data;
+            int wolves = w.CountUnits(SimConstants.WildPlayer);
+            Assert.That(wolves, Is.GreaterThan(0), "generated maps have wolf guardians");
+            Assert.IsTrue(World.AreEnemies(0, SimConstants.WildPlayer));
+            Assert.IsFalse(World.AreEnemies(SimConstants.WildPlayer, SimConstants.WildPlayer));
+
+            // Drop a treasure next to a villager and send it.
+            int[] v = TestWorld.UnitsOf(w, 0, "unit.villager");
+            FixVec2 at = w.Positions.Get(v[0]).Value;
+            int gold = data.ResourceIndex("gold");
+            int t = w.SpawnResourceNode(data.NodeIndex("res.treasure_gold"), at.CellX + 2, at.CellY, Fix64.FromInt(200));
+            Fix64 before = w.Players[0].Stockpile[gold];
+            Fix64 xpBefore = w.Players[0].Xp;
+            m.Source.Submit(new GatherCommand(0, new[] { v[0] }, t));
+            m.RunTicks(20 * 6);
+            Assert.IsFalse(w.IsAlive(t), "treasure is consumed");
+            Assert.AreEqual(before + Fix64.FromInt(200), w.Players[0].Stockpile[gold]);
+            Assert.That(w.Players[0].Xp, Is.GreaterThan(xpBefore));
+        }
+
+        [Test]
+        public void AgeUp_AppliesTheChosenBonus()
+        {
+            var m = new MatchRunner(TestWorld.Data, Gen("greatPlains", 9), new LocalCommandSource());
+            World w = m.World;
+            var data = w.Defs.Data;
+            int tc = w.FindBuilding(0, data.BuildingIndex("bld.towncenter"));
+            w.Players[0].Stockpile[data.ResourceIndex("food")] = Fix64.FromInt(1000);
+            int villagersBefore = TestWorld.UnitsOf(w, 0, "unit.villager").Length;
+            m.Source.Submit(new AgeUpCommand(0, tc, 0));   // The Naturalist: +3 villagers
+            m.RunTicks(60 * 20 + 5);
+            Assert.AreEqual(1, w.Players[0].Age);
+            Assert.AreEqual(villagersBefore + 3, TestWorld.UnitsOf(w, 0, "unit.villager").Length);
+        }
+
+        [Test]
         public void AiOnGeneratedMaps_StaysDeterministic()
         {
             ulong Run()

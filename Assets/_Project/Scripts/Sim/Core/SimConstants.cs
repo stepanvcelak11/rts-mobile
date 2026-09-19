@@ -23,6 +23,9 @@ namespace RTS.Sim.Core
         /// <summary>Player index used for neutral things (resource nodes, wildlife).</summary>
         public const int NeutralPlayer = -1;
 
+        /// <summary>Owner of wild animals and treasure guardians: hostile to every real player.</summary>
+        public const int WildPlayer = -2;
+
         /// <summary>Radius (cells) inside which a unit counts as "arrived" at a move target.</summary>
         public static readonly Fix64 ArriveRadius = Fix64.Ratio(1, 4);
 

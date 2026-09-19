@@ -280,6 +280,110 @@
     {
       "gatherNode": null,
       "market": false,
+      "id": "bld.lumbercamp",
+      "name": "Lumber Camp",
+      "civ": "common",
+      "age": "age.1",
+      "cost": {
+        "wood": 100
+      },
+      "buildSeconds": 25,
+      "footprint": [
+        2,
+        2
+      ],
+      "stats": {
+        "hp": 600,
+        "armor": {
+          "siege": -0.2,
+          "ranged": 0.6,
+          "melee": 0.6
+        },
+        "los": 6
+      },
+      "placement": {
+        "terrain": [
+          "grass",
+          "dirt",
+          "sand"
+        ],
+        "minDistanceToEnemyBuilding": 0,
+        "requiresNear": null
+      },
+      "trains": [],
+      "researches": [],
+      "dropOff": [
+        "wood"
+      ],
+      "populationProvided": 0,
+      "attack": null,
+      "garrison": 0,
+      "limit": 0,
+      "queue": {
+        "slots": 0,
+        "parallel": 0
+      },
+      "view": {
+        "prefab": "Buildings/LumberCamp",
+        "icon": "ui/bld/lumbercamp",
+        "constructionPrefab": "Buildings/_Scaffold2x2"
+      }
+    },
+    {
+      "gatherNode": null,
+      "market": false,
+      "id": "bld.miningcamp",
+      "name": "Mining Camp",
+      "civ": "common",
+      "age": "age.1",
+      "cost": {
+        "wood": 100
+      },
+      "buildSeconds": 25,
+      "footprint": [
+        2,
+        2
+      ],
+      "stats": {
+        "hp": 600,
+        "armor": {
+          "siege": -0.2,
+          "ranged": 0.6,
+          "melee": 0.6
+        },
+        "los": 6
+      },
+      "placement": {
+        "terrain": [
+          "grass",
+          "dirt",
+          "sand"
+        ],
+        "minDistanceToEnemyBuilding": 0,
+        "requiresNear": null
+      },
+      "trains": [],
+      "researches": [],
+      "dropOff": [
+        "gold"
+      ],
+      "populationProvided": 0,
+      "attack": null,
+      "garrison": 0,
+      "limit": 0,
+      "queue": {
+        "slots": 0,
+        "parallel": 0
+      },
+      "view": {
+        "prefab": "Buildings/MiningCamp",
+        "icon": "ui/bld/miningcamp",
+        "constructionPrefab": "Buildings/_Scaffold2x2"
+      }
+    },
+    {
+      "gatherNode": null,
+      "market": false,
       "id": "bld.barracks",
       "name": "Barracks",
       "civ": "common",

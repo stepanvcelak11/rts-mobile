@@ -1,0 +1,66 @@
+{
+  "id": "civ.sultan",
+  "name": "Sultanate",
+  "tagline": "Elite janissaries, strong towers",
+  "color": "#ef4444",
+  "startingUnits": [
+    {
+      "id": "unit.villager",
+      "count": 6
+    }
+  ],
+  "startingStockpile": {
+    "food": 200,
+    "wood": 200,
+    "gold": 150
+  },
+  "uniqueUnits": [
+    "unit.janissary"
+  ],
+  "uniqueBuildings": [],
+  "replacements": {
+    "unit.musketeer": "unit.janissary"
+  },
+  "modifiers": [
+    {
+      "target": "unit.villager",
+      "stat": "trainSeconds",
+      "op": "mul",
+      "value": 0.75
+    },
+    {
+      "target": "bld.tower",
+      "stat": "attacks.*.damage",
+      "op": "mul",
+      "value": 1.3
+    },
+    {
+      "target": "bld.tower",
+      "stat": "hp",
+      "op": "mul",
+      "value": 1.3
+    }
+  ],
+  "homeCity": {
+    "xpPerShipmentBase": 300,
+    "xpGrowth": 1.25,
+    "deck": [
+      "ship.3_villagers",
+      "ship.700_food",
+      "ship.700_wood",
+      "ship.5_musketeers",
+      "ship.600_gold",
+      "ship.outpost_boost",
+      "ship.2_falconets"
+    ],
+    "deckSize": 8
+  },
+  "ai": {
+    "buildOrder": "bo.sultan_boom",
+    "preferredComp": [
+      "unit.musketeer",
+      "unit.hussar",
+      "unit.falconet"
+    ]
+  }
+}

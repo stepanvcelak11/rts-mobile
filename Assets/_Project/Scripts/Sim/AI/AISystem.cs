@@ -24,6 +24,17 @@ namespace RTS.Sim.Systems
         private static readonly Profile Easy = new Profile { TargetVillagers = 12, WaveSize = 6, AgeUpVillagers = 12, ReserveFood = 150, WaveCooldownTicks = 20 * 180, ResearchTechs = false };
         private static readonly Profile Normal = new Profile { TargetVillagers = 18, WaveSize = 10, AgeUpVillagers = 10, ReserveFood = 100, WaveCooldownTicks = 20 * 120, ResearchTechs = true };
         private static readonly Profile Hard = new Profile { TargetVillagers = 26, WaveSize = 14, AgeUpVillagers = 8, ReserveFood = 50, WaveCooldownTicks = 20 * 75, ResearchTechs = true };
+        private static readonly Profile Expert = new Profile { TargetVillagers = 30, WaveSize = 16, AgeUpVillagers = 8, ReserveFood = 50, WaveCooldownTicks = 20 * 60, ResearchTechs = true };
+
+        /// <summary>Civ personality from ai.buildOrder ("…rush" attacks earlier and smaller, "…boom" grows bigger first).</summary>
+        private static Profile Personalize(Profile p, string buildOrder)
+        {
+            if (string.IsNullOrEmpty(buildOrder)) return p;
+            var q = new Profile { TargetVillagers = p.TargetVillagers, WaveSize = p.WaveSize, AgeUpVillagers = p.AgeUpVillagers, ReserveFood = p.ReserveFood, WaveCooldownTicks = p.WaveCooldownTicks, ResearchTechs = p.ResearchTechs };
+            if (buildOrder.EndsWith("rush")) { q.WaveSize = System.Math.Max(5, p.WaveSize - 4); q.AgeUpVillagers = System.Math.Max(6, p.AgeUpVillagers - 2); q.WaveCooldownTicks = p.WaveCooldownTicks * 3 / 4; }
+            else if (buildOrder.EndsWith("boom")) { q.TargetVillagers = p.TargetVillagers + 6; q.WaveSize = p.WaveSize + 2; }
+            return q;
+        }
 
         private readonly List<int> _idleVillagers = new List<int>();
         private readonly List<int> _army = new List<int>();
@@ -36,8 +47,11 @@ namespace RTS.Sim.Systems
             {
                 PlayerState ps = w.Players[p];
                 if (!ps.IsAi || !ps.Alive) continue;
+                if (ps.Ai == AiDifficulty.Expert && w.Tick % 20 == 0)
+                    for (int r = 0; r < ps.Stockpile.Length; r++) ps.Stockpile[r] = FixMath.Min(ps.Stockpile[r] + Fix64.One, w.Defs.StockpileCap);   // expert trickle
                 if ((w.Tick + p * 7) % 20 != 0) continue;
-                Think(w, ps, ps.Ai == AiDifficulty.Easy ? Easy : ps.Ai == AiDifficulty.Hard ? Hard : Normal);
+                Profile prof = ps.Ai == AiDifficulty.Easy ? Easy : ps.Ai == AiDifficulty.Hard ? Hard : ps.Ai == AiDifficulty.Expert ? Expert : Normal;
+                Think(w, ps, Personalize(prof, ps.CivIndex >= 0 ? w.Defs.Data.Civs[ps.CivIndex].ai.buildOrder : null));
             }
         }
 
@@ -79,6 +93,7 @@ namespace RTS.Sim.Systems
 
             // 1. Put idle villagers to work following a target split that shifts with the age.
             AssignVillagers(w, ps, home, villagers);
+            BuildCampsNearWork(w, ps);
 
             // 1b. Farms once the wild food near home is gone (or the economy is big).
             if (data.TryBuildingIndex("bld.mill", out int millIndex))
@@ -90,7 +105,7 @@ namespace RTS.Sim.Systems
             }
 
             // 2. Housing.
-            if (ps.PopulationCap - ps.Population <= 3 && ps.PopulationCap < w.Defs.PopulationCapMax
+            if (ps.PopulationCap - ps.Population <= 5 && ps.PopulationCap < w.Defs.PopulationCapMax
                 && data.TryBuildingIndex("bld.house", out int house) && w.CountBuildings(p, house, true) - w.CountBuildings(p, house, false) == 0)
                 TryBuild(w, ps, house, home, 3, 12);
 
@@ -233,6 +248,33 @@ namespace RTS.Sim.Systems
                 if (trainsSoldiers) n++;
             }
             return n;
+        }
+
+        /// <summary>Drop-off camps next to distant wood / gold so villagers stop walking home.</summary>
+        private void BuildCampsNearWork(World w, PlayerState ps)
+        {
+            if (w.Tick % 60 != 0) return;   // every 3 s is plenty
+            GameData data = w.Defs.Data;
+            int p = ps.Index;
+            int wood = data.ResourceIndex("wood"), gold = data.ResourceIndex("gold");
+            foreach (var pair in new[] { (wood, "bld.lumbercamp"), (gold, "bld.miningcamp") })
+            {
+                if (!data.TryBuildingIndex(pair.Item2, out int camp)) continue;
+                if (w.CountBuildings(p, camp, true) >= 3) continue;
+                // Where are our gatherers of this resource working?
+                for (int i = 0; i < w.Behaviours.Count; i++)
+                {
+                    int e = w.Behaviours.EntityAt(i);
+                    if (w.Identities.Get(e).Player != p) continue;
+                    UnitBehaviour b = w.Behaviours.At(i);
+                    if (b.State != UnitState.Gather || !w.Nodes.TryGet(b.TargetEntity, out ResourceNode n) || n.Resource != pair.Item1) continue;
+                    FixVec2 at = w.TargetPoint(b.TargetEntity);
+                    int drop = w.FindNearestDropOff(at, p, pair.Item1);
+                    if (drop != 0 && w.Footprints.Get(drop).DistanceSqTo(at) < Fix64.FromInt(64)) break;   // within 8 cells: fine
+                    TryBuild(w, ps, camp, at, 2, 5);
+                    break;
+                }
+            }
         }
 
         private static int FindVillagerDef(BakedDefs defs)

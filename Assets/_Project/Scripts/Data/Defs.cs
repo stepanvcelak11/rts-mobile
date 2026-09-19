@@ -194,6 +194,17 @@ namespace RTS.Data
         public bool oncePerGame;
     }
 
+    /// <summary>One of the bonuses a player picks when advancing (AoE3 politicians).</summary>
+    public sealed class AgeChoiceDef
+    {
+        public string id;
+        public string name;
+        public string description;
+        public List<ModifierDef> effects = new List<ModifierDef>();
+        public List<SpawnDef> spawns = new List<SpawnDef>();
+        public Cost stockpile = new Cost();
+    }
+
     public sealed class AgeDef
     {
         public string id;
@@ -201,6 +212,7 @@ namespace RTS.Data
         public Cost cost = new Cost();
         public decimal researchSeconds;
         public string at;
+        public List<AgeChoiceDef> choices = new List<AgeChoiceDef>();
     }
 
     public sealed class ResourceNodeDef
@@ -213,6 +225,8 @@ namespace RTS.Data
         public bool mobile;
         public decimal fleeRange;
         public string requiresBuilding;
+        /// <summary>Picked up instantly by the first villager to reach it: grants `amount` of its resource and XP.</summary>
+        public bool treasure;
 
         public int FootprintW => footprint.Count > 0 ? footprint[0] : 1;
         public int FootprintH => footprint.Count > 1 ? footprint[1] : 1;
@@ -260,6 +274,13 @@ namespace RTS.Data
         public int x, y;
     }
 
+    /// <summary>A wild unit placed on the map (treasure guardians, wildlife).</summary>
+    public sealed class GuardianDef
+    {
+        public string id;
+        public int x, y;
+    }
+
     public sealed class MapDef
     {
         public string id = "map.default";
@@ -269,6 +290,7 @@ namespace RTS.Data
         public List<TerrainPatchDef> patches = new List<TerrainPatchDef>();
         public List<NodePlacementDef> nodes = new List<NodePlacementDef>();
         public List<StartPositionDef> starts = new List<StartPositionDef>();
+        public List<GuardianDef> guardians = new List<GuardianDef>();
 
         public int Width => size.Count > 0 ? size[0] : 64;
         public int Height => size.Count > 1 ? size[1] : 64;

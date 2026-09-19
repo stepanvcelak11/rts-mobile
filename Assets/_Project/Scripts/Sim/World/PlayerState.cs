@@ -2,7 +2,7 @@ using RTS.Sim.Core;
 
 namespace RTS.Sim.Model
 {
-    public enum AiDifficulty : byte { None = 0, Easy = 1, Normal = 2, Hard = 3 }
+    public enum AiDifficulty : byte { None = 0, Easy = 1, Normal = 2, Hard = 3, Expert = 4 }
 
     /// <summary>Per-player state: economy, age, Home-City XP, research, and the player's own baked definitions.</summary>
     public sealed class PlayerState : IHashable
@@ -20,6 +20,7 @@ namespace RTS.Sim.Model
         public int Age;                      // index into Defs.Ages
         public int AgeUpBuilding;            // entity researching the next age, 0 = none
         public int AgeUpRemaining;           // ticks
+        public int AgeUpChoice;              // index into AgeDef.choices being adopted
 
         public Fix64 Xp;                     // Home-City experience
         public int ShipmentsSent;
@@ -78,7 +79,7 @@ namespace RTS.Sim.Model
             h.Add(Index); h.Add(CivIndex);
             for (int i = 0; i < Stockpile.Length; i++) h.Add(Stockpile[i]);
             h.Add(Population); h.Add(PopulationCap); h.Add(Alive);
-            h.Add(Age); h.Add(AgeUpBuilding); h.Add(AgeUpRemaining);
+            h.Add(Age); h.Add(AgeUpBuilding); h.Add(AgeUpRemaining); h.Add(AgeUpChoice);
             h.Add(Xp); h.Add(ShipmentsSent); h.Add(ShipmentsAvailable);
             for (int i = 0; i < MarketPrice.Length; i++) h.Add(MarketPrice[i]);
             for (int i = 0; i < Researched.Length; i++) h.Add(Researched[i]);

@@ -4,6 +4,9 @@
 export const PLAYER = ["#3b82f6", "#dc2626", "#f59e0b", "#22c55e"];
 const PLAYER_DARK = ["#1e40af", "#7f1d1d", "#92400e", "#14532d"];
 const PLAYER_LIGHT = ["#93c5fd", "#fca5a5", "#fde68a", "#86efac"];
+const WILD = "#6b6f78";
+export function playerColor(p) { return p < 0 ? WILD : PLAYER[p % 4]; }
+export function setCivColors(civColors) { civColors.forEach((c, i) => { if (c) { PLAYER[i] = c; PLAYER_DARK[i] = shade(c, 0.6); PLAYER_LIGHT[i] = mix(c, "#ffffff", 0.45); } }); }
 
 // terrain: 0 grass 1 dirt 2 sand 3 water 4 cliff
 const TERRAIN = [
@@ -121,8 +124,39 @@ export class Renderer {
     this.drawEntities(ents);
     this.drawEffects(buf, ents, dt);
     this.drawFog();
+    this.drawDayNight();
+    this.drawBirds(dt);
     this.drawPing(buf);
     this.lastEnts = ents;
+  }
+
+  /// Slow day/night cycle (8 minutes): a cool tint at night, warm at dusk. Purely cosmetic.
+  drawDayNight() {
+    const t = (this.time % 480) / 480;                 // 0 = noon, 0.5 = midnight
+    const night = Math.max(0, Math.cos(t * Math.PI * 2) * -1);   // 0 by day, 1 at midnight
+    const dusk = Math.max(0, 1 - Math.abs(t - 0.28) / 0.08) + Math.max(0, 1 - Math.abs(t - 0.72) / 0.08);
+    const ctx = this.ctx;
+    if (night > 0.02) { ctx.fillStyle = `rgba(10,20,60,${0.38 * night})`; ctx.fillRect(0, 0, innerWidth, innerHeight); }
+    if (dusk > 0.02) { ctx.fillStyle = `rgba(255,140,60,${0.12 * dusk})`; ctx.fillRect(0, 0, innerWidth, innerHeight); }
+  }
+
+  drawBirds(dt) {
+    if (!this.birds) this.birds = [];
+    if (this.birds.length < 2 && Math.random() < dt * 0.15) {
+      const dir = Math.random() < 0.5 ? 1 : -1;
+      this.birds.push({ x: dir > 0 ? -60 : innerWidth + 60, y: 40 + Math.random() * innerHeight * 0.4, dir, n: 3 + Math.floor(Math.random() * 4), t: 0 });
+    }
+    const ctx = this.ctx;
+    ctx.strokeStyle = "rgba(20,20,30,0.7)"; ctx.lineWidth = 1.5;
+    for (const b of this.birds) {
+      b.x += b.dir * dt * 45; b.t += dt;
+      for (let k = 0; k < b.n; k++) {
+        const bx = b.x - b.dir * k * 14, by = b.y + (k % 2) * 8 + Math.sin(b.t * 3 + k) * 2;
+        const f = Math.sin(b.t * 12 + k) * 3;
+        ctx.beginPath(); ctx.moveTo(bx - 5, by + f); ctx.lineTo(bx, by - 2); ctx.lineTo(bx + 5, by + f); ctx.stroke();
+      }
+    }
+    this.birds = this.birds.filter(b => b.x > -200 && b.x < innerWidth + 200);
   }
 
   // ---------------------------------------------------------------- ground
@@ -244,8 +278,11 @@ export class Renderer {
     const site = (e.flags & 2) !== 0;
     const remembered = (e.flags & 4096) !== 0;
     const sprite = buildingSprite(def.id, e.a, e.b, e.player, hw);
-    // anchor: sprite bottom center = screen point of footprint south corner? we anchor on the footprint's near corner (x, y).
     const [sx, sy] = this.toScreen(e.x, e.y);       // near corner of the diamond
+    // soft ground shadow toward the south-east
+    ctx.fillStyle = "rgba(0,0,0,0.16)";
+    const shc = this.toScreen(e.x + e.a / 2 + 0.25, e.y + e.b / 2 - 0.35);
+    ctx.beginPath(); ctx.ellipse(shc[0], shc[1] - lift, (e.a + e.b) * hw * 0.3, (e.a + e.b) * hh * 0.3, 0, 0, Math.PI * 2); ctx.fill();
     const scale = hw / BASE;
     const dw = sprite.width * scale, dh = sprite.height * scale;
     const left = sx - (e.b * BASE) * scale;          // sprite origin: west corner is at (x, y+h)
@@ -335,6 +372,7 @@ export class Renderer {
 
   drawUnit(e) {
     const ctx = this.ctx, hw = this.hw, hh = this.hh;
+    if (e.player < 0 && e.flags & 1) e.flags &= ~1;
     const lift = this.elevAt(e.x, e.y) * hh * 1.6;
     const [sx, syRaw] = this.toScreen(e.x, e.y);
     const sy = syRaw - lift;
@@ -342,6 +380,7 @@ export class Renderer {
     const moving = (e.flags & (1 << 18)) !== 0;
     const frame = moving ? Math.floor((this.time * 8 + e.id) % 2) : 0;
     const dir = facingBucket(e.facing);
+    if (def.tags.includes("tag.animal")) { const s2 = wolfSprite(dir, frame); return this.blitUnit(e, s2, sx, sy, moving); }
     const sprite = unitSprite(def.id, def.tags, e.player, dir, frame, e.state);
     const scale = hw / BASE;
     const dw = sprite.width * scale, dh = sprite.height * scale;
@@ -367,6 +406,16 @@ export class Renderer {
       ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.font = `${Math.max(9, hw * 0.35)}px system-ui`; ctx.textAlign = "center";
       ctx.fillText("z", sx + dw * 0.4, sy - dh - 2 + Math.sin(this.time * 3) * 2);
     }
+  }
+
+  blitUnit(e, sprite, sx, sy, moving) {
+    const ctx = this.ctx, hw = this.hw, hh = this.hh;
+    const scale = hw / BASE, dw = sprite.width * scale, dh = sprite.height * scale;
+    ctx.fillStyle = "rgba(0,0,0,0.28)"; ctx.beginPath(); ctx.ellipse(sx, sy, e.a * hw * 1.8, e.a * hh * 1.8, 0, 0, Math.PI * 2); ctx.fill();
+    const bob = moving ? Math.abs(Math.sin(this.time * 12 + e.id)) * hh * 0.1 : 0;
+    ctx.drawImage(sprite, sx - dw / 2, sy - dh + hh * 0.35 - bob, dw, dh);
+    this.hitRects.push({ id: e.id, x0: sx - dw / 2, y0: sy - dh + hh * 0.35, x1: sx + dw / 2, y1: sy + hh * 0.5, kind: 1, depth: depthKey(e) });
+    if (e.hp >= 0 && e.hp < 100) this.bar(sx, sy - dh - 4, Math.max(18, hw * 0.9), e.hp);
   }
 
   drawProjectile(e) {
@@ -501,9 +550,9 @@ export class Renderer {
     for (const e of ents) {
       if (e.kind === 4) continue;
       const px = e.x * s, py = (H - e.y) * s;
-      if (e.kind === 1) { mctx.fillStyle = e.player === localPlayer ? "#fff" : PLAYER[e.player % 4]; mctx.fillRect(px - 1, py - 1, 2.5, 2.5); }
-      else if (e.kind === 2) { mctx.fillStyle = PLAYER[e.player % 4]; mctx.fillRect(px, py - e.b * s, Math.max(2, e.a * s), Math.max(2, e.b * s)); }
-      else { mctx.fillStyle = e.state === 0 ? "#1e5a28" : e.state === 3 ? "#dcb432" : e.state === 1 ? "#96285a" : "#8c5a32"; mctx.fillRect(px, py - e.b * s, Math.max(1, e.a * s), Math.max(1, e.b * s)); }
+      if (e.kind === 1) { mctx.fillStyle = e.player === localPlayer ? "#fff" : playerColor(e.player); mctx.fillRect(px - 1, py - 1, 2.5, 2.5); }
+      else if (e.kind === 2) { mctx.fillStyle = playerColor(e.player); mctx.fillRect(px, py - e.b * s, Math.max(2, e.a * s), Math.max(2, e.b * s)); }
+      else { mctx.fillStyle = e.state === 0 ? "#1e5a28" : e.state === 3 ? "#dcb432" : e.state === 1 ? "#96285a" : e.state === 5 ? "#ffffff" : "#8c5a32"; mctx.fillRect(px, py - e.b * s, Math.max(1, e.a * s), Math.max(1, e.b * s)); }
     }
     // camera outline (the visible diamond)
     const corners = [[0, 0], [innerWidth, 0], [innerWidth, innerHeight], [0, innerHeight]].map(([sx, sy]) => this.toWorld(sx, sy));
@@ -551,15 +600,18 @@ function parseEntities(buf) {
 function depthKey(e) { return e.kind === 1 || e.kind === 4 ? e.x + e.y : e.x + e.a / 2 + e.y + e.b / 2; }
 function hash2(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >> 13)) * 1274126177; return (h ^ (h >> 16)) >>> 0; }
 function hexToRgb(hex) { return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)]; }
+function mix(a, b, t) { const A = hexToRgb(a), B = hexToRgb(b); return `rgb(${A[0] + (B[0] - A[0]) * t | 0},${A[1] + (B[1] - A[1]) * t | 0},${A[2] + (B[2] - A[2]) * t | 0})`; }
 function shade(hex, k) { const [r, g, b] = hexToRgb(hex); return `rgb(${Math.min(255, r * k) | 0},${Math.min(255, g * k) | 0},${Math.min(255, b * k) | 0})`; }
 function facingBucket(deg) { return ((Math.round(deg / 45) % 8) + 8) % 8; }   // 0 east, 2 north, 4 west, 6 south
 
 function offscreen(w, h) { const c = document.createElement("canvas"); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; }
 
 // ==================================================================== ground texture (square cell space, warped at draw time)
-const CELL = 24;   // texture pixels per cell
+let CELL = 24;   // texture pixels per cell (reduced on big maps to keep the texture under ~7 MP)
 
 function bakeGround(terrain, elev, W, H) {
+  CELL = Math.max(12, Math.min(24, Math.floor(2600 / Math.max(W, H))));
+  cache.forEach((v, k) => { if (k.startsWith("cell:")) cache.delete(k); });
   const c = offscreen(W * CELL, H * CELL);
   const g = c.getContext("2d");
   const land = (x, y) => x >= 0 && y >= 0 && x < W && y < H && terrain[y * W + x] !== 3;
@@ -707,6 +759,12 @@ function nodeSprite(kind, variant, size, hw, depleting) {
     g.strokeStyle = "#5a3b21"; g.lineWidth = 2;
     for (const dx of [-0.25, -0.1, 0.12, 0.27]) { g.beginPath(); g.moveTo(cx + dx * BASE, base - BASE * 0.2); g.lineTo(cx + dx * BASE, base); g.stroke(); }
     g.beginPath(); g.moveTo(cx + BASE * 0.42, base - BASE * 0.7); g.lineTo(cx + BASE * 0.5, base - BASE * 0.95); g.moveTo(cx + BASE * 0.42, base - BASE * 0.7); g.lineTo(cx + BASE * 0.3, base - BASE * 0.92); g.stroke();
+  } else if (kind === 5) {    // treasure chest with a glint
+    g.fillStyle = "#6b4426"; g.fillRect(cx - BASE * 0.45, base - BASE * 0.5, BASE * 0.9, BASE * 0.45);
+    g.fillStyle = "#8a5a34"; g.beginPath(); g.moveTo(cx - BASE * 0.48, base - BASE * 0.5); g.lineTo(cx + BASE * 0.48, base - BASE * 0.5); g.lineTo(cx + BASE * 0.4, base - BASE * 0.7); g.lineTo(cx - BASE * 0.4, base - BASE * 0.7); g.closePath(); g.fill();
+    g.fillStyle = "#f2c94c"; g.fillRect(cx - BASE * 0.06, base - BASE * 0.5, BASE * 0.12, BASE * 0.14); g.fillRect(cx - BASE * 0.45, base - BASE * 0.32, BASE * 0.9, BASE * 0.05);
+    g.fillStyle = "#fff8c0"; g.beginPath(); g.arc(cx + BASE * 0.3, base - BASE * 0.75, BASE * 0.06, 0, 7); g.fill();
+    g.strokeStyle = "rgba(0,0,0,0.4)"; g.lineWidth = 1; g.strokeRect(cx - BASE * 0.45, base - BASE * 0.5, BASE * 0.9, BASE * 0.45);
   } else {                    // farm plot
     g.fillStyle = "#9a7a3a"; g.fillRect(cx - BASE, base - BASE * 0.5, BASE * 2, BASE * 0.5);
   }
@@ -728,7 +786,8 @@ function buildingSprite(id, w, h, player, hw) {
   c = offscreen(cw * s, ch * s);
   const g = c.getContext("2d");
   g.scale(s, s);
-  const col = PLAYER[player % 4], dark = PLAYER_DARK[player % 4], light = PLAYER_LIGHT[player % 4];
+  const pi = ((player % 4) + 4) % 4;
+  const col = PLAYER[pi], dark = PLAYER_DARK[pi], light = PLAYER_LIGHT[pi];
   // Diamond corners in sprite space: west corner (x, y+h) at left middle-bottom; near corner (x, y) at bottom center-left...
   // Sprite origin: the footprint's four corners.
   const P = (x, y) => [(x - y) * HW + h * HW, ch - (x + y) * HH];   // (0,0) near corner bottom, x right-up, y left-up
@@ -760,6 +819,7 @@ function buildingSprite(id, w, h, player, hw) {
 
 function wallHeight(id, w, h) {
   switch (id) {
+    case "bld.lumbercamp": case "bld.miningcamp": return 0.7;
     case "bld.towncenter": return 1.6;
     case "bld.tower": return 2.6;
     case "bld.house": return 0.9;
@@ -780,6 +840,8 @@ function buildingStyle(id) {
     case "bld.stable": return { westWall: "#9c7b55", eastWall: "#bd9a70", roof: "thatch" };
     case "bld.foundry": return { westWall: "#7d7570", eastWall: "#9a928c", roof: "tile" };
     case "bld.market": return { westWall: "#b7a488", eastWall: "#d8c7a6", roof: "awning" };
+    case "bld.lumbercamp": return { westWall: "#8a6a44", eastWall: "#a8865a", roof: "thatch" };
+    case "bld.miningcamp": return { westWall: "#8a8073", eastWall: "#a89c8a", roof: "tile" };
     default: return { westWall: "#b0a08a", eastWall: "#cfbea4", roof: "tile" };
   }
 }
@@ -848,7 +910,8 @@ function unitSprite(id, tags, player, dir, frame, state) {
   const W = artillery ? BASE * 2.2 : cavalry ? BASE * 2.0 : BASE * 1.3, H = artillery ? BASE * 1.6 : cavalry ? BASE * 1.9 : BASE * 1.9;
   c = offscreen(W, H);
   const g = c.getContext("2d");
-  const col = PLAYER[player % 4], dark = PLAYER_DARK[player % 4];
+  const pi = ((player % 4) + 4) % 4;
+  const col = player < 0 ? WILD : PLAYER[pi], dark = player < 0 ? "#3d4048" : PLAYER_DARK[pi];
   const cx = W / 2, base = H - 2;
   const left = dir > 2 && dir < 6;                 // facing west-ish → mirror
   g.translate(cx, 0); if (left) g.scale(-1, 1); g.translate(-cx, 0);
@@ -926,6 +989,29 @@ function drawCannon(g, cx, base, col, dark, mortar) {
   if (mortar) { g.beginPath(); g.moveTo(cx - BASE * 0.25, base - BASE * 0.55); g.lineTo(cx + BASE * 0.25, base - BASE * 0.55); g.lineTo(cx + BASE * 0.45, base - BASE * 1.15); g.lineTo(cx - BASE * 0.05, base - BASE * 1.15); g.closePath(); g.fill(); }
   else { g.beginPath(); g.moveTo(cx - BASE * 0.3, base - BASE * 0.55); g.lineTo(cx - BASE * 0.3, base - BASE * 0.8); g.lineTo(cx + BASE * 0.95, base - BASE * 1.0); g.lineTo(cx + BASE * 0.95, base - BASE * 0.78); g.closePath(); g.fill(); }
   g.fillStyle = col; g.fillRect(cx - BASE * 0.15, base - BASE * 0.7, BASE * 0.3, BASE * 0.12);
+}
+
+function wolfSprite(dir, frame) {
+  const key = `wolf:${dir}:${frame}`;
+  let c = cache.get(key);
+  if (c) return c;
+  const W = BASE * 1.6, H = BASE * 1.1;
+  c = offscreen(W, H);
+  const g = c.getContext("2d");
+  const cx = W / 2, base = H - 2;
+  const left = dir > 2 && dir < 6;
+  g.translate(cx, 0); if (left) g.scale(-1, 1); g.translate(-cx, 0);
+  const walk = frame === 1 ? 1 : -1;
+  g.fillStyle = "#6b6f78";
+  g.beginPath(); g.ellipse(cx, base - BASE * 0.4, BASE * 0.5, BASE * 0.22, 0, 0, 7); g.fill();
+  g.beginPath(); g.ellipse(cx + BASE * 0.5, base - BASE * 0.55, BASE * 0.2, BASE * 0.14, 0.2, 0, 7); g.fill();
+  g.fillStyle = "#4b4f57"; g.beginPath(); g.moveTo(cx + BASE * 0.45, base - BASE * 0.66); g.lineTo(cx + BASE * 0.52, base - BASE * 0.85); g.lineTo(cx + BASE * 0.6, base - BASE * 0.64); g.fill();
+  g.strokeStyle = "#4b4f57"; g.lineWidth = 2.4; g.lineCap = "round";
+  for (const [dx, ph] of [[-0.35, 1], [-0.2, -1], [0.2, -1], [0.35, 1]]) { g.beginPath(); g.moveTo(cx + dx * BASE, base - BASE * 0.3); g.lineTo(cx + dx * BASE + ph * walk * 2.5, base); g.stroke(); }
+  g.beginPath(); g.moveTo(cx - BASE * 0.5, base - BASE * 0.45); g.lineTo(cx - BASE * 0.78, base - BASE * 0.3); g.stroke();
+  g.fillStyle = "#f5e6c8"; g.beginPath(); g.arc(cx + BASE * 0.58, base - BASE * 0.56, 1.6, 0, 7); g.fill();
+  cache.set(key, c);
+  return c;
 }
 
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r); g.lineTo(x + w, y + h - r); g.quadraticCurveTo(x + w, y + h, x + w - r, y + h); g.lineTo(x + r, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r); g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y); g.closePath(); }

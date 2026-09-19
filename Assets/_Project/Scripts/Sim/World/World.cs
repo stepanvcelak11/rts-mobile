@@ -434,7 +434,14 @@ namespace RTS.Sim.Model
             return Fix64.MaxValue;
         }
 
-        public static bool AreEnemies(int player, int otherPlayer) => player >= 0 && otherPlayer >= 0 && player != otherPlayer;
+        /// <summary>Real players fight each other and the wild; the wild never fights itself; nobody fights neutral nodes.</summary>
+        public static bool AreEnemies(int player, int otherPlayer)
+        {
+            if (player == SimConstants.NeutralPlayer || otherPlayer == SimConstants.NeutralPlayer) return false;
+            if (player == SimConstants.WildPlayer) return otherPlayer >= 0;
+            if (otherPlayer == SimConstants.WildPlayer) return player >= 0;
+            return player != otherPlayer;
+        }
 
         /// <summary>Awards Home-City experience to a player.</summary>
         public void AddXp(int player, Fix64 amount)
@@ -457,6 +464,10 @@ namespace RTS.Sim.Model
                     if (Map.Validate(n.x, n.y, bn.W, bn.H, WalkableMask) == PlacementResult.Ok)
                         SpawnResourceNode(ni, n.x, n.y, n.amount < 0 ? Fix64.FromInt(-1) : Fix64.FromDecimal(n.amount));
                 }
+
+            foreach (GuardianDef g in mapDef.guardians)
+                if (Defs.Data.TryUnitIndex(g.id, out int gi) && Map.IsPassable(g.x, g.y))
+                    SpawnUnit(gi, SimConstants.WildPlayer, FixVec2.CellCenter(g.x, g.y));
 
             if (!Config.SpawnStartingUnits) return;
             int tcIndex = Defs.Data.TryBuildingIndex("bld.towncenter", out int tc) ? tc : -1;

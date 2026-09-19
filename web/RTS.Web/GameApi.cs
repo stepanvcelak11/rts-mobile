@@ -90,7 +90,7 @@ public static partial class GameApi
             MapType = string.IsNullOrEmpty(mapType) ? null : mapType,
             MapSize = mapSize <= 0 ? 80 : mapSize,
             CivIds = new[] { civ, enemyCiv },
-            Ai = new[] { AiDifficulty.None, (AiDifficulty)Math.Clamp(difficulty, 1, 3) },
+            Ai = new[] { AiDifficulty.None, (AiDifficulty)Math.Clamp(difficulty, 1, 4) },
         };
         _s = new WebSession(Data, config, 0);
         _fog = new byte[_s.World.Map.Width * _s.World.Map.Height];
@@ -262,7 +262,7 @@ public static partial class GameApi
         _buf.Add(a); _buf.Add(b); _buf.Add(hp); _buf.Add(flags); _buf.Add(facing); _buf.Add(state);
     }
 
-    private static int NodeKind(string id) => id switch { "res.tree" => 0, "res.berries" => 1, "res.hunt" => 2, "res.mine" => 3, _ => 4 };
+    private static int NodeKind(string id) => id switch { "res.tree" => 0, "res.berries" => 1, "res.hunt" => 2, "res.mine" => 3, _ => id.StartsWith("res.treasure") ? 5 : 4 };
 
     private static int TagIndex(World w, string tag)
     {
@@ -381,8 +381,9 @@ public static partial class GameApi
             case "selectvillagers": c.SelectAll(soldiers: false); break;
             case "stance": { int[] u = c.SelectedUnits(); if (u.Length > 0) c.Submit(new StanceCommand(me, u, (Stance)arg)); break; }
             case "train": { int b = c.SelectedBuilding(); if (b != 0) c.Submit(new TrainCommand(me, b, arg)); break; }
+            case "train5": { int b = c.SelectedBuilding(); if (b != 0) for (int k = 0; k < 5; k++) c.Submit(new TrainCommand(me, b, arg)); break; }
             case "research": { int b = c.SelectedBuilding(); if (b != 0) c.Submit(new ResearchCommand(me, b, arg)); break; }
-            case "ageup": { int b = c.SelectedBuilding(); if (b != 0) c.Submit(new AgeUpCommand(me, b)); break; }
+            case "ageup": { int b = c.SelectedBuilding(); if (b != 0) c.Submit(new AgeUpCommand(me, b, arg)); break; }
             case "cancel": { int b = c.SelectedBuilding(); if (b != 0) c.Submit(new CancelCommand(me, b)); break; }
             case "clearrally": { int b = c.SelectedBuilding(); if (b != 0) c.Submit(new RallyCommand(me, b, FixVec2.Zero, clear: true)); break; }
             case "buy": c.Submit(new TradeCommand(me, arg, buy: true)); break;
@@ -626,6 +627,8 @@ public static partial class GameApi
                 CommandRejectReason why = TrainCommand.Validate(w, me, building, ui);
                 string note = why == CommandRejectReason.WrongAge ? " (Age " + (u.Age + 1) + ")" : "";
                 actions.Add(("train:" + ui, u.Def.name + note + "|" + CostText(w, u.Cost), why == CommandRejectReason.None, "train", "unit:" + u.Id, UnitTip(w, u)));
+                if (why == CommandRejectReason.None && u.Def.batchSize > 1)
+                    actions.Add(("train5:" + ui, "×5 " + u.Def.name + "|" + CostText(w, Times(u.Cost, 5)), true, "train", "unit:" + u.Id, "Queue five at once"));
             }
             if (q.Count > 0) actions.Add(("cancel", "Cancel last", true, "danger", "x", "Refunds the last queued unit"));
             actions.Add(("rallymode", w.Rallies.Has(building) ? "Move rally" : "Rally point", true, "neutral", "rally", "Where new units gather"));
@@ -645,7 +648,14 @@ public static partial class GameApi
         {
             BakedAge next = w.Defs.Ages[ps.Age + 1];
             CommandRejectReason why = AgeUpCommand.Validate(w, me, building);
-            actions.Add(("ageup", "Age up: " + next.Def.name + "|" + CostText(w, next.Cost), why == CommandRejectReason.None, "age", "age", "Unlocks new buildings, units and shipments"));
+            if (next.Def.choices.Count == 0)
+                actions.Add(("ageup:0", "Age up: " + next.Def.name + "|" + CostText(w, next.Cost), why == CommandRejectReason.None, "age", "age", "Unlocks new buildings, units and shipments"));
+            else
+                for (int i = 0; i < next.Def.choices.Count; i++)
+                {
+                    AgeChoiceDef ch = next.Def.choices[i];
+                    actions.Add(("ageup:" + i, next.Def.name + " Age with " + ch.name + "|" + CostText(w, next.Cost), why == CommandRejectReason.None, "age", "age", ch.description + " · unlocks the " + next.Def.name + " Age"));
+                }
         }
         if (b.GatherNode >= 0) label += "  ·  farm: send villagers here for food";
         return label;
@@ -662,6 +672,13 @@ public static partial class GameApi
             parts.Add(who + what + " " + amount);
         }
         return string.Join(", ", parts);
+    }
+
+    private static Fix64[] Times(Fix64[] cost, int n)
+    {
+        var r = new Fix64[cost.Length];
+        for (int i = 0; i < r.Length; i++) r[i] = cost[i] * n;
+        return r;
     }
 
     private static string CostText(World w, Fix64[] cost)

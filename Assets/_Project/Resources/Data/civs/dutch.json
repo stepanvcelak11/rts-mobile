@@ -1,0 +1,72 @@
+{
+  "id": "civ.dutch",
+  "name": "Dutch Republic",
+  "tagline": "Villagers cost gold; cheap markets and banks",
+  "color": "#f97316",
+  "startingUnits": [
+    {
+      "id": "unit.villager",
+      "count": 6
+    }
+  ],
+  "startingStockpile": {
+    "food": 200,
+    "wood": 200,
+    "gold": 300
+  },
+  "uniqueUnits": [
+    "unit.ruyter"
+  ],
+  "uniqueBuildings": [],
+  "replacements": {
+    "unit.dragoon": "unit.ruyter"
+  },
+  "modifiers": [
+    {
+      "target": "unit.villager",
+      "stat": "cost.food",
+      "op": "set",
+      "value": 0
+    },
+    {
+      "target": "unit.villager",
+      "stat": "cost.gold",
+      "op": "set",
+      "value": 90
+    },
+    {
+      "target": "bld.market",
+      "stat": "cost.wood",
+      "op": "mul",
+      "value": 0.5
+    },
+    {
+      "target": "*",
+      "stat": "gather.res.mine",
+      "op": "mul",
+      "value": 1.15
+    }
+  ],
+  "homeCity": {
+    "xpPerShipmentBase": 300,
+    "xpGrowth": 1.25,
+    "deck": [
+      "ship.3_villagers",
+      "ship.600_gold",
+      "ship.700_wood",
+      "ship.5_skirmishers",
+      "ship.3_dragoons",
+      "ship.700_food",
+      "ship.2_falconets"
+    ],
+    "deckSize": 8
+  },
+  "ai": {
+    "buildOrder": "bo.dutch_boom",
+    "preferredComp": [
+      "unit.skirmisher",
+      "unit.dragoon",
+      "unit.pikeman"
+    ]
+  }
+}

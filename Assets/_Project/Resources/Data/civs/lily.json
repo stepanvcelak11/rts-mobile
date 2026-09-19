@@ -1,0 +1,60 @@
+{
+  "id": "civ.lily",
+  "name": "Lily Kingdom",
+  "tagline": "Heavy cuirassiers and skilled villagers",
+  "color": "#8b5cf6",
+  "startingUnits": [
+    {
+      "id": "unit.villager",
+      "count": 6
+    }
+  ],
+  "startingStockpile": {
+    "food": 200,
+    "wood": 200,
+    "gold": 100
+  },
+  "uniqueUnits": [
+    "unit.cuirassier"
+  ],
+  "uniqueBuildings": [],
+  "replacements": {
+    "unit.hussar": "unit.cuirassier"
+  },
+  "modifiers": [
+    {
+      "target": "*",
+      "stat": "gather.*",
+      "op": "mul",
+      "value": 1.08
+    },
+    {
+      "target": "tag.villager",
+      "stat": "hp",
+      "op": "mul",
+      "value": 1.2
+    }
+  ],
+  "homeCity": {
+    "xpPerShipmentBase": 300,
+    "xpGrowth": 1.25,
+    "deck": [
+      "ship.3_villagers",
+      "ship.700_wood",
+      "ship.700_food",
+      "ship.4_hussars",
+      "ship.600_gold",
+      "ship.5_skirmishers",
+      "ship.2_falconets"
+    ],
+    "deckSize": 8
+  },
+  "ai": {
+    "buildOrder": "bo.lily_boom",
+    "preferredComp": [
+      "unit.hussar",
+      "unit.skirmisher",
+      "unit.musketeer"
+    ]
+  }
+}

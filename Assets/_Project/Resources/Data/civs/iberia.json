@@ -1,0 +1,61 @@
+{
+  "id": "civ.iberia",
+  "name": "Iberian Crown",
+  "tagline": "Fast shipments and rodeleros",
+  "color": "#eab308",
+  "startingUnits": [
+    {
+      "id": "unit.villager",
+      "count": 6
+    }
+  ],
+  "startingStockpile": {
+    "food": 200,
+    "wood": 200,
+    "gold": 100
+  },
+  "uniqueUnits": [
+    "unit.rodelero"
+  ],
+  "uniqueBuildings": [],
+  "replacements": {
+    "unit.pikeman": "unit.rodelero"
+  },
+  "modifiers": [
+    {
+      "target": "shipment",
+      "stat": "xpCost",
+      "op": "mul",
+      "value": 0.75
+    },
+    {
+      "target": "tag.infantry",
+      "stat": "speed",
+      "op": "mul",
+      "value": 1.05
+    }
+  ],
+  "homeCity": {
+    "xpPerShipmentBase": 300,
+    "xpGrowth": 1.25,
+    "deck": [
+      "ship.3_villagers",
+      "ship.700_food",
+      "ship.700_wood",
+      "ship.8_pikemen",
+      "ship.600_gold",
+      "ship.4_hussars",
+      "ship.5_musketeers",
+      "ship.2_falconets"
+    ],
+    "deckSize": 8
+  },
+  "ai": {
+    "buildOrder": "bo.iberia_rush",
+    "preferredComp": [
+      "unit.pikeman",
+      "unit.musketeer",
+      "unit.hussar"
+    ]
+  }
+}

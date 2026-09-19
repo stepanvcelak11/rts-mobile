@@ -79,6 +79,11 @@ COMMON_UNITS = [
          ["tag.artillery"], "defensive", 6, 0),
 ]
 
+WILD_UNITS = [
+    unit("unit.wolf", "Wolf", "wild", "age.1", [], {}, 0, 0, 1, 110, 5.5, 8, NO_ARMOR, "small",
+         [melee(12, 1.2, {"tag.villager": 1.5})], ["tag.animal"], "aggressive", 6, 0),
+]
+
 UNIQUE_UNITS = [
     unit("unit.redcoat", "Redcoat", "civ.crown", "age.2", [], {"food": 80, "gold": 25}, 30, 1, 5, 170, 4.0, 12,
          {"melee": 0.2, "ranged": 0, "siege": 0}, "small",
@@ -90,6 +95,24 @@ UNIQUE_UNITS = [
     unit("unit.jaguar", "Jaguar Warrior", "civ.sun", "age.2", [], {"food": 60, "gold": 30}, 28, 1, 5, 180, 5.0, 10,
          {"melee": 0.2, "ranged": 0.1, "siege": 0}, "small",
          [melee(14, 1.5, {"tag.infantry": 2.0, "tag.cavalry": 1.5, "tag.building": 2.0})], ["tag.infantry", "tag.melee"], "defensive", 9, 0),
+    unit("unit.cuirassier", "Cuirassier", "civ.lily", "age.2", [], {"food": 150, "gold": 150}, 45, 3, 3, 500, 6.25, 12,
+         {"melee": 0.3, "ranged": 0.3, "siege": 0}, "medium",
+         [melee(36, 1.5, {"tag.villager": 2.0, "tag.artillery": 3.0, "tag.ranged": 1.5})], ["tag.cavalry", "tag.melee"], "aggressive", 12, 0),
+    unit("unit.strelets", "Strelets", "civ.tsar", "age.2", [], {"food": 45, "gold": 15}, 24, 1, 10, 100, 4.0, 12,
+         {"melee": 0.2, "ranged": 0, "siege": 0}, "small",
+         [ranged(15, 12, 3.0, "proj.bullet", {"tag.villager": 1.5}), melee(9, 1.5, {"tag.cavalry": 3.0})],
+         ["tag.infantry", "tag.gunpowder"], "defensive", 8, 0),
+    unit("unit.janissary", "Janissary", "civ.sultan", "age.2", [], {"food": 100, "gold": 25}, 34, 1, 5, 200, 4.0, 12,
+         {"melee": 0.2, "ranged": 0, "siege": 0}, "small",
+         [ranged(23, 12, 3.0, "proj.bullet", {"tag.villager": 1.5}), melee(16, 1.5, {"tag.cavalry": 3.0})],
+         ["tag.infantry", "tag.gunpowder"], "defensive", 8, 0),
+    unit("unit.ruyter", "Ruyter", "civ.dutch", "age.3", [], {"food": 30, "gold": 75}, 32, 1, 5, 180, 6.75, 14,
+         {"melee": 0.2, "ranged": 0.2, "siege": 0}, "medium",
+         [ranged(15, 12, 3.0, "proj.bullet", {"tag.cavalry": 3.0, "tag.artillery": 2.0}), melee(8, 1.5, {})],
+         ["tag.cavalry", "tag.ranged", "tag.gunpowder"], "aggressive", 12, 0),
+    unit("unit.rodelero", "Rodelero", "civ.iberia", "age.2", [], {"food": 60, "gold": 40}, 28, 1, 5, 145, 5.0, 10,
+         {"melee": 0.3, "ranged": 0.1, "siege": 0}, "small",
+         [melee(17, 1.5, {"tag.cavalry": 1.5, "tag.building": 2.5})], ["tag.infantry", "tag.melee"], "defensive", 9, 0),
 ]
 
 
@@ -119,6 +142,8 @@ BUILDINGS = [
     bld("bld.mill", "Mill", "age.1", {"wood": 250}, 35, [3, 3], 1500, 6, G2, [], ["tech.seed_drill"], ["food"], 0, None, 0, 0, 0, gather_node="res.farm"),
     bld("bld.market", "Market", "age.2", {"wood": 200}, 40, [3, 3], 1200, 8, G2, [], ["tech.gang_saw", "tech.placer_mines"], [], 0, None, 0, 1, 0, market=True),
     bld("bld.tower", "Outpost", "age.1", {"wood": 250}, 45, [2, 2], 1500, 14, G3, [], [], [], 0, TOWER_ATTACK, 5, 5, 0),
+    bld("bld.lumbercamp", "Lumber Camp", "age.1", {"wood": 100}, 25, [2, 2], 600, 6, G3, [], [], ["wood"], 0, None, 0, 0, 0),
+    bld("bld.miningcamp", "Mining Camp", "age.1", {"wood": 100}, 25, [2, 2], 600, 6, G3, [], [], ["gold"], 0, None, 0, 0, 0),
     bld("bld.barracks", "Barracks", "age.2", {"wood": 200}, 45, [4, 4], 2000, 10, G2, ["unit.musketeer", "unit.crossbowman", "unit.pikeman", "unit.skirmisher"],
         ["tech.veteran_infantry", "tech.guard_infantry"], [], 0, None, 0, 0, 5),
     bld("bld.stable", "Stable", "age.2", {"wood": 200}, 45, [4, 4], 2000, 10, G2, ["unit.hussar", "unit.dragoon"], ["tech.veteran_cavalry", "tech.guard_cavalry"], [], 0, None, 0, 0, 5),
@@ -190,6 +215,51 @@ CIVS = {
                      "deck": ["ship.3_villagers", "ship.700_wood", "ship.4_hussars", "ship.600_gold", "ship.8_pikemen", "ship.3_dragoons", "ship.2_falconets"], "deckSize": 8},
         "ai": {"buildOrder": "bo.compact_rush", "preferredComp": ["unit.hussar", "unit.pikeman", "unit.musketeer", "unit.dragoon"]},
     },
+    "lily": {
+        "id": "civ.lily", "name": "Lily Kingdom", "tagline": "Heavy cuirassiers and skilled villagers", "color": "#8b5cf6",
+        "startingUnits": [{"id": "unit.villager", "count": 6}], "startingStockpile": {"food": 200, "wood": 200, "gold": 100},
+        "uniqueUnits": ["unit.cuirassier"], "uniqueBuildings": [], "replacements": {"unit.hussar": "unit.cuirassier"},
+        "modifiers": [mod("*", "gather.*", "mul", 1.08), mod("tag.villager", "hp", "mul", 1.2)],
+        "homeCity": {"xpPerShipmentBase": 300, "xpGrowth": 1.25,
+                     "deck": ["ship.3_villagers", "ship.700_wood", "ship.700_food", "ship.4_hussars", "ship.600_gold", "ship.5_skirmishers", "ship.2_falconets"], "deckSize": 8},
+        "ai": {"buildOrder": "bo.lily_boom", "preferredComp": ["unit.hussar", "unit.skirmisher", "unit.musketeer"]},
+    },
+    "tsar": {
+        "id": "civ.tsar", "name": "Tsardom", "tagline": "Cheap massed infantry", "color": "#10b981",
+        "startingUnits": [{"id": "unit.villager", "count": 6}], "startingStockpile": {"food": 200, "wood": 200, "gold": 100},
+        "uniqueUnits": ["unit.strelets"], "uniqueBuildings": [], "replacements": {"unit.musketeer": "unit.strelets"},
+        "modifiers": [mod("bld.barracks", "cost.wood", "mul", 0.7), mod("tag.infantry", "trainSeconds", "mul", 0.8), mod("bld.house", "hp", "mul", 1.5)],
+        "homeCity": {"xpPerShipmentBase": 300, "xpGrowth": 1.25,
+                     "deck": ["ship.3_villagers", "ship.700_wood", "ship.8_pikemen", "ship.5_musketeers", "ship.600_gold", "ship.4_hussars", "ship.2_falconets"], "deckSize": 8},
+        "ai": {"buildOrder": "bo.tsar_rush", "preferredComp": ["unit.musketeer", "unit.pikeman", "unit.hussar", "unit.falconet"]},
+    },
+    "sultan": {
+        "id": "civ.sultan", "name": "Sultanate", "tagline": "Elite janissaries, strong towers", "color": "#ef4444",
+        "startingUnits": [{"id": "unit.villager", "count": 6}], "startingStockpile": {"food": 200, "wood": 200, "gold": 150},
+        "uniqueUnits": ["unit.janissary"], "uniqueBuildings": [], "replacements": {"unit.musketeer": "unit.janissary"},
+        "modifiers": [mod("unit.villager", "trainSeconds", "mul", 0.75), mod("bld.tower", "attacks.*.damage", "mul", 1.3), mod("bld.tower", "hp", "mul", 1.3)],
+        "homeCity": {"xpPerShipmentBase": 300, "xpGrowth": 1.25,
+                     "deck": ["ship.3_villagers", "ship.700_food", "ship.700_wood", "ship.5_musketeers", "ship.600_gold", "ship.outpost_boost", "ship.2_falconets"], "deckSize": 8},
+        "ai": {"buildOrder": "bo.sultan_boom", "preferredComp": ["unit.musketeer", "unit.hussar", "unit.falconet"]},
+    },
+    "dutch": {
+        "id": "civ.dutch", "name": "Dutch Republic", "tagline": "Villagers cost gold; cheap markets and banks", "color": "#f97316",
+        "startingUnits": [{"id": "unit.villager", "count": 6}], "startingStockpile": {"food": 200, "wood": 200, "gold": 300},
+        "uniqueUnits": ["unit.ruyter"], "uniqueBuildings": [], "replacements": {"unit.dragoon": "unit.ruyter"},
+        "modifiers": [mod("unit.villager", "cost.food", "set", 0), mod("unit.villager", "cost.gold", "set", 90), mod("bld.market", "cost.wood", "mul", 0.5), mod("*", "gather.res.mine", "mul", 1.15)],
+        "homeCity": {"xpPerShipmentBase": 300, "xpGrowth": 1.25,
+                     "deck": ["ship.3_villagers", "ship.600_gold", "ship.700_wood", "ship.5_skirmishers", "ship.3_dragoons", "ship.700_food", "ship.2_falconets"], "deckSize": 8},
+        "ai": {"buildOrder": "bo.dutch_boom", "preferredComp": ["unit.skirmisher", "unit.dragoon", "unit.pikeman"]},
+    },
+    "iberia": {
+        "id": "civ.iberia", "name": "Iberian Crown", "tagline": "Fast shipments and rodeleros", "color": "#eab308",
+        "startingUnits": [{"id": "unit.villager", "count": 6}], "startingStockpile": {"food": 200, "wood": 200, "gold": 100},
+        "uniqueUnits": ["unit.rodelero"], "uniqueBuildings": [], "replacements": {"unit.pikeman": "unit.rodelero"},
+        "modifiers": [mod("shipment", "xpCost", "mul", 0.75), mod("tag.infantry", "speed", "mul", 1.05)],
+        "homeCity": {"xpPerShipmentBase": 300, "xpGrowth": 1.25,
+                     "deck": ["ship.3_villagers", "ship.700_food", "ship.700_wood", "ship.8_pikemen", "ship.600_gold", "ship.4_hussars", "ship.5_musketeers", "ship.2_falconets"], "deckSize": 8},
+        "ai": {"buildOrder": "bo.iberia_rush", "preferredComp": ["unit.pikeman", "unit.musketeer", "unit.hussar"]},
+    },
     "sun": {
         "id": "civ.sun", "name": "Sun Empire", "tagline": "Swift villagers and jaguar warriors", "color": "#F59E0B",
         "startingUnits": [{"id": "unit.villager", "count": 7}], "startingStockpile": {"food": 250, "wood": 200, "gold": 50},
@@ -205,7 +275,11 @@ CIVS = {
 
 def main():
     dump("units/common.json", {"items": COMMON_UNITS})
+    for civ in CIVS.values():
+        for unit_id in civ["uniqueUnits"]:
+            assert any(u["id"] == unit_id and u["civ"] == civ["id"] for u in UNIQUE_UNITS), unit_id
     dump("units/unique.json", {"items": UNIQUE_UNITS})
+    dump("units/wild.json", {"items": WILD_UNITS})
     dump("buildings/common.json", {"items": BUILDINGS})
     dump("techs/common.json", {"items": TECHS})
     for key, civ in CIVS.items():

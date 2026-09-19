@@ -32,6 +32,23 @@ namespace RTS.Sim.Systems
             ref ResourceNode node = ref w.Nodes.Get(b.TargetEntity);
             if (node.IsDepleted || node.Resource < 0) return;
 
+            if (w.Defs.Nodes[node.Def].Treasure)
+            {
+                // Treasure: the whole amount goes straight to the stockpile, plus experience.
+                int owner = w.Identities.Get(e).Player;
+                if (owner >= 0)
+                {
+                    PlayerState ps = w.Players[owner];
+                    ps.Stockpile[node.Resource] = FixMath.Min(ps.Stockpile[node.Resource] + node.Amount, w.Defs.StockpileCap);
+                    w.AddXp(owner, Fix64.FromInt(50));
+                    w.Events.Add(new SimEvent(SimEventKind.ResourceDeposited, e, node.Resource, b.TargetEntity, node.Amount));
+                    w.Events.Add(new SimEvent(SimEventKind.NodeDepleted, b.TargetEntity));
+                }
+                node.Amount = Fix64.Zero;
+                w.Despawn(b.TargetEntity);
+                return;
+            }
+
             // Switching resource drops the old cargo (AoE rule).
             if (cargo.Resource != node.Resource)
             {

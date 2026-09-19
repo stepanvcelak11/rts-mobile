@@ -46,6 +46,7 @@ namespace RTS.Sim.Model
             foreach (var s in starts) StartResources(g, rng, occ, s.Item1, s.Item2, def);
             MiddleResources(g, rng, occ, starts, def);
             Forests(g, rng, occ, def, starts);
+            Treasures(g, rng, occ, def, starts);
 
             def.patches.AddRange(g.ToPatches());
             return def;
@@ -213,6 +214,28 @@ namespace RTS.Sim.Model
             Place(g, occ, def, "res.mine", cx - 14, cy + 11, 3, 3, 5000);
             for (int i = 0; i < 6; i++) Place(g, occ, def, "res.berries", rng.Range(10, g.W - 12), rng.Range(10, g.H - 12), 2, 2);
             for (int i = 0; i < 10; i++) Place(g, occ, def, "res.hunt", rng.Range(6, g.W - 6), rng.Range(6, g.H - 6), 1, 1);
+        }
+
+        /// <summary>Guarded treasures scattered away from the starts: a reason to explore early.</summary>
+        private static void Treasures(Grid g, DetRandom rng, Occupancy occ, MapDef def, (int, int)[] starts)
+        {
+            string[] kinds = { "res.treasure_food", "res.treasure_wood", "res.treasure_gold" };
+            int count = 4 + g.W / 20;
+            for (int i = 0; i < count; i++)
+            {
+                int x = rng.Range(6, g.W - 6), y = rng.Range(6, g.H - 6);
+                bool nearStart = false;
+                foreach (var s in starts) if (Math.Abs(x - s.Item1) < 14 && Math.Abs(y - s.Item2) < 14) nearStart = true;
+                if (nearStart || !occ.Free(x, y, 1, 1)) continue;
+                occ.Take(x, y, 1, 1);
+                def.nodes.Add(new NodePlacementDef { id = kinds[rng.Range(0, kinds.Length)], x = x, y = y, amount = 100 + rng.Range(0, 5) * 50 });
+                int wolves = 1 + rng.Range(0, 3);
+                for (int k = 0; k < wolves; k++)
+                {
+                    int wx = x + rng.Range(-2, 3), wy = y + rng.Range(-2, 3);
+                    if (g.In(wx, wy) && TerrainTypes.IsWalkable(g.Type(wx, wy))) def.guardians.Add(new GuardianDef { id = "unit.wolf", x = wx, y = wy });
+                }
+            }
         }
 
         private static void Forests(Grid g, DetRandom rng, Occupancy occ, MapDef def, (int, int)[] starts)

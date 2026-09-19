@@ -69,16 +69,19 @@
           <select id="mapType"></select>
           <div class="row">
             <label><input type="radio" name="size" value="64" /> Small</label>
-            <label><input type="radio" name="size" value="80" checked /> Medium</label>
-            <label><input type="radio" name="size" value="104" /> Large</label>
+            <label><input type="radio" name="size" value="96" checked /> Medium</label>
+            <label><input type="radio" name="size" value="128" /> Large</label>
+            <label><input type="radio" name="size" value="160" /> Huge</label>
           </div>
         </div>
         <div>
           <h2>Opponent</h2>
+          <select id="enemyCiv"><option value="random">Random civilization</option></select>
           <div class="row col">
             <label><input type="radio" name="diff" value="1" /> Easy</label>
             <label><input type="radio" name="diff" value="2" checked /> Normal</label>
             <label><input type="radio" name="diff" value="3" /> Hard</label>
+            <label><input type="radio" name="diff" value="4" /> Expert (bonus resources)</label>
           </div>
         </div>
       </div>

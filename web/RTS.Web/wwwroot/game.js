@@ -1,6 +1,6 @@
 // Browser client for the RTS: boot, lobby, input gestures, HUD and the frame loop.
 // All rules live in the .NET simulation (GameApi exports); render.js draws, sfx.js beeps.
-import { Renderer, iconFor, PLAYER } from "./render.js";
+import { Renderer, iconFor, PLAYER, setCivColors } from "./render.js";
 import { sfx, unlock, setMuted, isMuted } from "./sfx.js";
 
 const S = 64;
@@ -42,6 +42,8 @@ function buildMenu() {
     el.onclick = () => { selected = c.id; [...box.children].forEach(x => x.classList.remove("selected")); el.classList.add("selected"); sfx.click(); };
     box.appendChild(el);
   });
+  const enemySel = $("enemyCiv");
+  civs.forEach(c => { const o = document.createElement("option"); o.value = c.id; o.textContent = c.name; enemySel.appendChild(o); });
   const maps = JSON.parse(api.MapTypes());
   const names = { twoRivers: "Two Rivers", greatPlains: "Great Plains", highlands: "Highlands", lakeland: "Lakeland" };
   const sel = $("mapType");
@@ -54,7 +56,8 @@ function buildMenu() {
     const diff = parseInt(document.querySelector('input[name="diff"]:checked').value, 10);
     const size = parseInt(document.querySelector('input[name="size"]:checked').value, 10);
     const others = civs.filter(c => c.id !== selected);
-    const enemy = others.length ? others[Math.floor(Math.random() * others.length)].id : selected;
+    const enemySel = $("enemyCiv").value;
+    const enemy = enemySel && enemySel !== "random" ? enemySel : (others.length ? others[Math.floor(Math.random() * others.length)].id : selected);
     startMatch(selected, enemy, diff, sel.value, size);
   };
   $("againBtn").onclick = () => { $("end").classList.add("hidden"); $("hud").classList.add("hidden"); $("menu").classList.remove("hidden"); running = false; };
@@ -72,6 +75,9 @@ window.addEventListener("resize", () => setTimeout(layoutHud, 50));
 
 function startMatch(civ, enemy, diff, mapType, size) {
   api.StartMatch(civ, enemy, diff, 0, mapType, size);
+  const civList = JSON.parse(api.Civs());
+  const col = (id) => (civList.find(c => c.id === id) || {}).color;
+  setCivColors([col(civ) === col(enemy) ? null : col(civ), col(enemy)]);
   const w = api.MapWidth(), h = api.MapHeight();
   R.setMap(w, h, api.Terrain(), defs);
   R.setFog(api.Fog());

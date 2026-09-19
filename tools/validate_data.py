@@ -98,6 +98,8 @@ def main() -> int:
                 ref(u, "gather.allowed", g, allow_glob=True)
         if not u.get("attacks"):
             err(f"{u['_file']} {u['id']}: needs at least one attack (even villagers)")
+        if u.get("civ") not in ("common", "wild") and u["civ"] not in ids:
+            err(f"{u['_file']} {u['id']}: unknown civ {u['civ']}")
     for b in buildings:
         check_cost(b, b.get("cost", {}))
         fp = b.get("footprint", [0, 0])

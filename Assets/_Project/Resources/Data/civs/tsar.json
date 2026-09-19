@@ -1,0 +1,67 @@
+{
+  "id": "civ.tsar",
+  "name": "Tsardom",
+  "tagline": "Cheap massed infantry",
+  "color": "#10b981",
+  "startingUnits": [
+    {
+      "id": "unit.villager",
+      "count": 6
+    }
+  ],
+  "startingStockpile": {
+    "food": 200,
+    "wood": 200,
+    "gold": 100
+  },
+  "uniqueUnits": [
+    "unit.strelets"
+  ],
+  "uniqueBuildings": [],
+  "replacements": {
+    "unit.musketeer": "unit.strelets"
+  },
+  "modifiers": [
+    {
+      "target": "bld.barracks",
+      "stat": "cost.wood",
+      "op": "mul",
+      "value": 0.7
+    },
+    {
+      "target": "tag.infantry",
+      "stat": "trainSeconds",
+      "op": "mul",
+      "value": 0.8
+    },
+    {
+      "target": "bld.house",
+      "stat": "hp",
+      "op": "mul",
+      "value": 1.5
+    }
+  ],
+  "homeCity": {
+    "xpPerShipmentBase": 300,
+    "xpGrowth": 1.25,
+    "deck": [
+      "ship.3_villagers",
+      "ship.700_wood",
+      "ship.8_pikemen",
+      "ship.5_musketeers",
+      "ship.600_gold",
+      "ship.4_hussars",
+      "ship.2_falconets"
+    ],
+    "deckSize": 8
+  },
+  "ai": {
+    "buildOrder": "bo.tsar_rush",
+    "preferredComp": [
+      "unit.musketeer",
+      "unit.pikeman",
+      "unit.hussar",
+      "unit.falconet"
+    ]
+  }
+}

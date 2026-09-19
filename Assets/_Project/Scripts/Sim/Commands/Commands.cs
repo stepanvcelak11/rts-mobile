@@ -359,8 +359,9 @@ namespace RTS.Sim.Commands
         public byte TypeId => CommandType.AgeUp;
         public int Player { get; }
         public readonly int Building;
+        public readonly int Choice;
 
-        public AgeUpCommand(int player, int building) { Player = player; Building = building; }
+        public AgeUpCommand(int player, int building, int choice = 0) { Player = player; Building = building; Choice = choice; }
 
         public static CommandRejectReason Validate(World w, int player, int building)
         {
@@ -384,10 +385,11 @@ namespace RTS.Sim.Commands
             ps.Pay(next.Cost);
             ps.AgeUpBuilding = Building;
             ps.AgeUpRemaining = next.ResearchTicks;
+            ps.AgeUpChoice = Choice;
         }
 
-        public void Write(BinaryWriter w) { w.Write(Player); w.Write(Building); }
-        public static AgeUpCommand Read(BinaryReader r) => new AgeUpCommand(r.ReadInt32(), r.ReadInt32());
+        public void Write(BinaryWriter w) { w.Write(Player); w.Write(Building); w.Write(Choice); }
+        public static AgeUpCommand Read(BinaryReader r) => new AgeUpCommand(r.ReadInt32(), r.ReadInt32(), r.ReadInt32());
     }
 
     /// <summary>Research a technology at a building (one at a time per building).</summary>
