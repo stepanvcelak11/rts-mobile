@@ -69,6 +69,8 @@ namespace RTS.Data
         public bool TryBuildingIndex(string id, out int index) => _buildingIndex.TryGetValue(id ?? "", out index);
         public bool TryResourceIndex(string id, out int index) => _resourceIndex.TryGetValue(id ?? "", out index);
         public bool TryNodeIndex(string id, out int index) => _nodeIndex.TryGetValue(id ?? "", out index);
+        public bool TryTechIndex(string id, out int index) => _techIndex.TryGetValue(id ?? "", out index);
+        public bool TryCivIndex(string id, out int index) => _civIndex.TryGetValue(id ?? "", out index);
 
         private static int Lookup(Dictionary<string, int> dict, string id, string kind)
         {

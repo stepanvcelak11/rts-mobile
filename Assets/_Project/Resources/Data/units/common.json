@@ -1,45 +1,376 @@
-{ "items": [
-  {
-    "id": "unit.villager", "name": "Villager", "civ": "common", "age": "age.1",
-    "trainedAt": ["bld.towncenter"], "cost": { "food": 100 }, "trainSeconds": 25, "population": 1, "batchSize": 1,
-    "stats": { "hp": 120, "speed": 4.0, "los": 10, "armor": { "melee": 0, "ranged": 0, "siege": 0 }, "sizeClass": "small" },
-    "attacks": [ { "id": "melee", "damage": 8, "type": "melee", "range": 1, "cooldownSeconds": 1.5, "multipliers": {} } ],
-    "tags": ["tag.villager"],
-    "behaviour": { "canGather": true, "canBuild": true, "aggro": "passive", "leashRange": 0, "fleeHpPercent": 30 },
-    "gather": { "allowed": ["res.*"], "rateMultiplier": 1.0 },
-    "view": { "prefab": "Units/Villager", "icon": "ui/units/villager", "scale": 1.0, "voiceSet": "vo.villager" }
-  },
-  {
-    "id": "unit.musketeer", "name": "Musketeer", "civ": "common", "age": "age.2",
-    "trainedAt": ["bld.barracks"], "cost": { "food": 75, "gold": 25 }, "trainSeconds": 30, "population": 1, "batchSize": 5,
-    "stats": { "hp": 150, "speed": 4.0, "los": 12, "armor": { "melee": 0.2, "ranged": 0, "siege": 0 }, "sizeClass": "small" },
-    "attacks": [
-      { "id": "ranged", "damage": 23, "type": "ranged", "range": 12, "minRange": 0, "cooldownSeconds": 3.0, "projectile": "proj.bullet", "multipliers": { "tag.villager": 1.5 } },
-      { "id": "melee",  "damage": 13, "type": "melee",  "range": 1, "cooldownSeconds": 1.5, "multipliers": { "tag.cavalry": 3.0 } }
-    ],
-    "tags": ["tag.infantry", "tag.gunpowder"],
-    "behaviour": { "canGather": false, "canBuild": false, "aggro": "defensive", "leashRange": 8, "fleeHpPercent": 0 },
-    "gather": null,
-    "view": { "prefab": "Units/Musketeer", "icon": "ui/units/musketeer", "scale": 1.0, "voiceSet": "vo.musketeer" }
-  },
-  {
-    "id": "unit.pikeman", "name": "Pikeman", "civ": "common", "age": "age.2",
-    "trainedAt": ["bld.barracks"], "cost": { "food": 40, "wood": 40 }, "trainSeconds": 25, "population": 1, "batchSize": 5,
-    "stats": { "hp": 120, "speed": 4.5, "los": 10, "armor": { "melee": 0.1, "ranged": 0.1, "siege": 0 }, "sizeClass": "small" },
-    "attacks": [ { "id": "melee", "damage": 8, "type": "melee", "range": 1, "cooldownSeconds": 1.5, "multipliers": { "tag.cavalry": 5.0, "tag.building": 3.0 } } ],
-    "tags": ["tag.infantry", "tag.melee"],
-    "behaviour": { "canGather": false, "canBuild": false, "aggro": "defensive", "leashRange": 8, "fleeHpPercent": 0 },
-    "gather": null,
-    "view": { "prefab": "Units/Pikeman", "icon": "ui/units/pikeman", "scale": 1.0, "voiceSet": "vo.pikeman" }
-  },
-  {
-    "id": "unit.hussar", "name": "Hussar", "civ": "common", "age": "age.2",
-    "trainedAt": ["bld.stable"], "cost": { "food": 120, "gold": 80 }, "trainSeconds": 40, "population": 2, "batchSize": 3,
-    "stats": { "hp": 320, "speed": 6.75, "los": 12, "armor": { "melee": 0.2, "ranged": 0.2, "siege": 0 }, "sizeClass": "medium" },
-    "attacks": [ { "id": "melee", "damage": 30, "type": "melee", "range": 1, "cooldownSeconds": 1.5, "multipliers": { "tag.villager": 2.0, "tag.artillery": 3.0 } } ],
-    "tags": ["tag.cavalry", "tag.melee"],
-    "behaviour": { "canGather": false, "canBuild": false, "aggro": "aggressive", "leashRange": 12, "fleeHpPercent": 0 },
-    "gather": null,
-    "view": { "prefab": "Units/Hussar", "icon": "ui/units/hussar", "scale": 1.1, "voiceSet": "vo.hussar" }
-  }
-]}
+{
+  "items": [
+    {
+      "id": "unit.villager",
+      "name": "Villager",
+      "civ": "common",
+      "age": "age.1",
+      "trainedAt": [
+        "bld.towncenter"
+      ],
+      "cost": {
+        "food": 100
+      },
+      "trainSeconds": 25,
+      "population": 1,
+      "batchSize": 1,
+      "stats": {
+        "hp": 120,
+        "speed": 4.0,
+        "los": 10,
+        "armor": {
+          "melee": 0,
+          "ranged": 0,
+          "siege": 0
+        },
+        "sizeClass": "small"
+      },
+      "attacks": [
+        {
+          "id": "melee",
+          "damage": 8,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {}
+        }
+      ],
+      "tags": [
+        "tag.villager"
+      ],
+      "behaviour": {
+        "canGather": true,
+        "canBuild": true,
+        "aggro": "passive",
+        "leashRange": 0,
+        "fleeHpPercent": 60
+      },
+      "gather": {
+        "allowed": [
+          "res.*"
+        ],
+        "rateMultiplier": 1.0
+      },
+      "view": {
+        "prefab": "Units/Villager",
+        "icon": "ui/units/villager",
+        "scale": 1.0,
+        "voiceSet": "vo.villager"
+      }
+    },
+    {
+      "id": "unit.musketeer",
+      "name": "Musketeer",
+      "civ": "common",
+      "age": "age.2",
+      "trainedAt": [
+        "bld.barracks"
+      ],
+      "cost": {
+        "food": 75,
+        "gold": 25
+      },
+      "trainSeconds": 30,
+      "population": 1,
+      "batchSize": 5,
+      "stats": {
+        "hp": 150,
+        "speed": 4.0,
+        "los": 12,
+        "armor": {
+          "melee": 0.2,
+          "ranged": 0,
+          "siege": 0
+        },
+        "sizeClass": "small"
+      },
+      "attacks": [
+        {
+          "id": "ranged",
+          "damage": 23,
+          "type": "ranged",
+          "range": 12,
+          "minRange": 0,
+          "cooldownSeconds": 3.0,
+          "projectile": "proj.bullet",
+          "multipliers": {
+            "tag.villager": 1.5
+          }
+        },
+        {
+          "id": "melee",
+          "damage": 13,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {
+            "tag.cavalry": 3.0
+          }
+        }
+      ],
+      "tags": [
+        "tag.infantry",
+        "tag.gunpowder"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "defensive",
+        "leashRange": 8,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Musketeer",
+        "icon": "ui/units/musketeer",
+        "scale": 1.0,
+        "voiceSet": "vo.musketeer"
+      }
+    },
+    {
+      "id": "unit.crossbowman",
+      "name": "Crossbowman",
+      "civ": "common",
+      "age": "age.2",
+      "trainedAt": [
+        "bld.barracks"
+      ],
+      "cost": {
+        "food": 40,
+        "wood": 40
+      },
+      "trainSeconds": 25,
+      "population": 1,
+      "batchSize": 5,
+      "stats": {
+        "hp": 100,
+        "speed": 4.0,
+        "los": 14,
+        "armor": {
+          "melee": 0,
+          "ranged": 0.2,
+          "siege": 0
+        },
+        "sizeClass": "small"
+      },
+      "attacks": [
+        {
+          "id": "ranged",
+          "damage": 15,
+          "type": "ranged",
+          "range": 14,
+          "minRange": 0,
+          "cooldownSeconds": 1.5,
+          "projectile": "proj.bolt",
+          "multipliers": {
+            "tag.infantry": 1.5,
+            "tag.villager": 1.5
+          }
+        },
+        {
+          "id": "melee",
+          "damage": 6,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {}
+        }
+      ],
+      "tags": [
+        "tag.infantry",
+        "tag.ranged"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "defensive",
+        "leashRange": 8,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Crossbowman",
+        "icon": "ui/units/crossbowman",
+        "scale": 1.0,
+        "voiceSet": "vo.crossbowman"
+      }
+    },
+    {
+      "id": "unit.pikeman",
+      "name": "Pikeman",
+      "civ": "common",
+      "age": "age.2",
+      "trainedAt": [
+        "bld.barracks"
+      ],
+      "cost": {
+        "food": 40,
+        "wood": 40
+      },
+      "trainSeconds": 25,
+      "population": 1,
+      "batchSize": 5,
+      "stats": {
+        "hp": 120,
+        "speed": 4.5,
+        "los": 10,
+        "armor": {
+          "melee": 0.1,
+          "ranged": 0.1,
+          "siege": 0
+        },
+        "sizeClass": "small"
+      },
+      "attacks": [
+        {
+          "id": "melee",
+          "damage": 8,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {
+            "tag.cavalry": 5.0,
+            "tag.building": 3.0
+          }
+        }
+      ],
+      "tags": [
+        "tag.infantry",
+        "tag.melee"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "defensive",
+        "leashRange": 8,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Pikeman",
+        "icon": "ui/units/pikeman",
+        "scale": 1.0,
+        "voiceSet": "vo.pikeman"
+      }
+    },
+    {
+      "id": "unit.hussar",
+      "name": "Hussar",
+      "civ": "common",
+      "age": "age.2",
+      "trainedAt": [
+        "bld.stable"
+      ],
+      "cost": {
+        "food": 120,
+        "gold": 80
+      },
+      "trainSeconds": 40,
+      "population": 2,
+      "batchSize": 3,
+      "stats": {
+        "hp": 320,
+        "speed": 6.75,
+        "los": 12,
+        "armor": {
+          "melee": 0.2,
+          "ranged": 0.2,
+          "siege": 0
+        },
+        "sizeClass": "medium"
+      },
+      "attacks": [
+        {
+          "id": "melee",
+          "damage": 30,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {
+            "tag.villager": 2.0,
+            "tag.artillery": 3.0,
+            "tag.ranged": 1.5
+          }
+        }
+      ],
+      "tags": [
+        "tag.cavalry",
+        "tag.melee"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "aggressive",
+        "leashRange": 12,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Hussar",
+        "icon": "ui/units/hussar",
+        "scale": 1.0,
+        "voiceSet": "vo.hussar"
+      }
+    },
+    {
+      "id": "unit.falconet",
+      "name": "Falconet",
+      "civ": "common",
+      "age": "age.3",
+      "trainedAt": [
+        "bld.foundry"
+      ],
+      "cost": {
+        "wood": 100,
+        "gold": 300
+      },
+      "trainSeconds": 50,
+      "population": 3,
+      "batchSize": 1,
+      "stats": {
+        "hp": 200,
+        "speed": 3.0,
+        "los": 20,
+        "armor": {
+          "melee": 0,
+          "ranged": 0.5,
+          "siege": 0
+        },
+        "sizeClass": "large"
+      },
+      "attacks": [
+        {
+          "id": "cannon",
+          "damage": 100,
+          "type": "siege",
+          "range": 20,
+          "minRange": 3,
+          "cooldownSeconds": 4.0,
+          "projectile": "proj.cannonball",
+          "multipliers": {
+            "tag.infantry": 0.5,
+            "tag.cavalry": 0.5,
+            "tag.building": 2.0
+          }
+        }
+      ],
+      "tags": [
+        "tag.artillery"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "defensive",
+        "leashRange": 6,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Falconet",
+        "icon": "ui/units/falconet",
+        "scale": 1.0,
+        "voiceSet": "vo.falconet"
+      }
+    }
+  ]
+}

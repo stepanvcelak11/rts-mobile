@@ -1,8 +1,8 @@
 {
-  "id": "civ.crown",
-  "name": "The Crown",
-  "tagline": "Line infantry and cheap shipments",
-  "color": "#3B82F6",
+  "id": "civ.compact",
+  "name": "Iron Compact",
+  "tagline": "Fast cavalry and rich forests",
+  "color": "#DC2626",
   "startingUnits": [
     {
       "id": "unit.villager",
@@ -11,34 +11,34 @@
   ],
   "startingStockpile": {
     "food": 200,
-    "wood": 200,
+    "wood": 250,
     "gold": 100
   },
   "uniqueUnits": [
-    "unit.redcoat"
+    "unit.uhlan"
   ],
   "uniqueBuildings": [],
   "replacements": {
-    "unit.musketeer": "unit.redcoat"
+    "unit.hussar": "unit.uhlan"
   },
   "modifiers": [
     {
-      "target": "tag.infantry",
-      "stat": "hp",
+      "target": "tag.cavalry",
+      "stat": "attacks.*.damage",
       "op": "mul",
       "value": 1.1
     },
     {
-      "target": "bld.house",
+      "target": "bld.stable",
       "stat": "cost.wood",
       "op": "mul",
-      "value": 0.8
+      "value": 0.75
     },
     {
-      "target": "shipment",
-      "stat": "xpCost",
+      "target": "*",
+      "stat": "gather.res.tree",
       "op": "mul",
-      "value": 0.9
+      "value": 1.1
     }
   ],
   "homeCity": {
@@ -47,19 +47,19 @@
     "deck": [
       "ship.3_villagers",
       "ship.700_wood",
-      "ship.700_food",
-      "ship.5_musketeers",
+      "ship.4_hussars",
       "ship.600_gold",
+      "ship.8_pikemen",
       "ship.2_falconets"
     ],
     "deckSize": 8
   },
   "ai": {
-    "buildOrder": "bo.crown_boom",
+    "buildOrder": "bo.compact_rush",
     "preferredComp": [
-      "unit.musketeer",
       "unit.hussar",
-      "unit.crossbowman"
+      "unit.pikeman",
+      "unit.musketeer"
     ]
   }
 }

@@ -46,6 +46,7 @@ namespace RTS.Sim.Core
             return Normalized * maxLength;
         }
 
+        public static FixVec2 Lerp(FixVec2 a, FixVec2 b, Fix64 t) => a + (b - a) * t;
         public static Fix64 Distance(FixVec2 a, FixVec2 b) => (a - b).Length;
         public static Fix64 DistanceSq(FixVec2 a, FixVec2 b) => (a - b).LengthSq;
 

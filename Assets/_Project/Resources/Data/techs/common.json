@@ -1,11 +1,359 @@
-{ "items": [
-  { "id": "tech.veteran_infantry", "name": "Veteran Infantry", "kind": "tech", "age": "age.3",
-    "researchedAt": ["bld.barracks"], "cost": { "wood": 200, "gold": 200 }, "researchSeconds": 40,
-    "effects": [ { "target": "tag.infantry", "stat": "hp", "op": "mul", "value": 1.2 },
-                 { "target": "tag.infantry", "stat": "attacks.*.damage", "op": "mul", "value": 1.2 } ],
-    "prerequisites": [] },
-  { "id": "ship.3_villagers", "name": "3 Villagers", "kind": "shipment", "age": "age.1",
-    "effects": [], "spawns": [ { "id": "unit.villager", "count": 3 } ], "oncePerGame": false },
-  { "id": "ship.700_wood", "name": "700 Wood", "kind": "shipment", "age": "age.2",
-    "effects": [ { "target": "player", "stat": "stockpile.wood", "op": "add", "value": 700 } ], "spawns": [], "oncePerGame": false }
-]}
+{
+  "items": [
+    {
+      "id": "tech.hunting_dogs",
+      "name": "Hunting Dogs",
+      "kind": "tech",
+      "age": "age.1",
+      "researchedAt": [
+        "bld.towncenter"
+      ],
+      "cost": {
+        "food": 100
+      },
+      "researchSeconds": 30,
+      "effects": [
+        {
+          "target": "*",
+          "stat": "gather.res.hunt",
+          "op": "mul",
+          "value": 1.1
+        },
+        {
+          "target": "*",
+          "stat": "gather.res.berries",
+          "op": "mul",
+          "value": 1.1
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [],
+      "oncePerGame": true
+    },
+    {
+      "id": "tech.gang_saw",
+      "name": "Gang Saw",
+      "kind": "tech",
+      "age": "age.2",
+      "researchedAt": [
+        "bld.towncenter"
+      ],
+      "cost": {
+        "wood": 150,
+        "gold": 100
+      },
+      "researchSeconds": 40,
+      "effects": [
+        {
+          "target": "*",
+          "stat": "gather.res.tree",
+          "op": "mul",
+          "value": 1.15
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [],
+      "oncePerGame": true
+    },
+    {
+      "id": "tech.placer_mines",
+      "name": "Placer Mines",
+      "kind": "tech",
+      "age": "age.2",
+      "researchedAt": [
+        "bld.towncenter"
+      ],
+      "cost": {
+        "wood": 200
+      },
+      "researchSeconds": 40,
+      "effects": [
+        {
+          "target": "*",
+          "stat": "gather.res.mine",
+          "op": "mul",
+          "value": 1.15
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [],
+      "oncePerGame": true
+    },
+    {
+      "id": "tech.veteran_infantry",
+      "name": "Veteran Infantry",
+      "kind": "tech",
+      "age": "age.3",
+      "researchedAt": [
+        "bld.barracks"
+      ],
+      "cost": {
+        "wood": 200,
+        "gold": 200
+      },
+      "researchSeconds": 40,
+      "effects": [
+        {
+          "target": "tag.infantry",
+          "stat": "hp",
+          "op": "mul",
+          "value": 1.2
+        },
+        {
+          "target": "tag.infantry",
+          "stat": "attacks.*.damage",
+          "op": "mul",
+          "value": 1.2
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [],
+      "oncePerGame": true
+    },
+    {
+      "id": "tech.veteran_cavalry",
+      "name": "Veteran Cavalry",
+      "kind": "tech",
+      "age": "age.3",
+      "researchedAt": [
+        "bld.stable"
+      ],
+      "cost": {
+        "wood": 200,
+        "gold": 200
+      },
+      "researchSeconds": 40,
+      "effects": [
+        {
+          "target": "tag.cavalry",
+          "stat": "hp",
+          "op": "mul",
+          "value": 1.2
+        },
+        {
+          "target": "tag.cavalry",
+          "stat": "attacks.*.damage",
+          "op": "mul",
+          "value": 1.2
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [],
+      "oncePerGame": true
+    },
+    {
+      "id": "ship.3_villagers",
+      "name": "3 Villagers",
+      "kind": "shipment",
+      "age": "age.1",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [],
+      "spawns": [
+        {
+          "id": "unit.villager",
+          "count": 3
+        }
+      ],
+      "prerequisites": [],
+      "oncePerGame": false
+    },
+    {
+      "id": "ship.4_villagers",
+      "name": "4 Villagers",
+      "kind": "shipment",
+      "age": "age.1",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [],
+      "spawns": [
+        {
+          "id": "unit.villager",
+          "count": 4
+        }
+      ],
+      "prerequisites": [],
+      "oncePerGame": true
+    },
+    {
+      "id": "ship.700_wood",
+      "name": "700 Wood",
+      "kind": "shipment",
+      "age": "age.2",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [
+        {
+          "target": "player",
+          "stat": "stockpile.wood",
+          "op": "add",
+          "value": 700
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [],
+      "oncePerGame": false
+    },
+    {
+      "id": "ship.700_food",
+      "name": "700 Food",
+      "kind": "shipment",
+      "age": "age.2",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [
+        {
+          "target": "player",
+          "stat": "stockpile.food",
+          "op": "add",
+          "value": 700
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [],
+      "oncePerGame": false
+    },
+    {
+      "id": "ship.600_gold",
+      "name": "600 Gold",
+      "kind": "shipment",
+      "age": "age.2",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [
+        {
+          "target": "player",
+          "stat": "stockpile.gold",
+          "op": "add",
+          "value": 600
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [],
+      "oncePerGame": false
+    },
+    {
+      "id": "ship.1000_wood",
+      "name": "1000 Wood",
+      "kind": "shipment",
+      "age": "age.3",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [
+        {
+          "target": "player",
+          "stat": "stockpile.wood",
+          "op": "add",
+          "value": 1000
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [],
+      "oncePerGame": false
+    },
+    {
+      "id": "ship.5_musketeers",
+      "name": "5 Musketeers",
+      "kind": "shipment",
+      "age": "age.2",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [],
+      "spawns": [
+        {
+          "id": "unit.musketeer",
+          "count": 5
+        }
+      ],
+      "prerequisites": [],
+      "oncePerGame": false
+    },
+    {
+      "id": "ship.8_pikemen",
+      "name": "8 Pikemen",
+      "kind": "shipment",
+      "age": "age.2",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [],
+      "spawns": [
+        {
+          "id": "unit.pikeman",
+          "count": 8
+        }
+      ],
+      "prerequisites": [],
+      "oncePerGame": false
+    },
+    {
+      "id": "ship.4_hussars",
+      "name": "4 Hussars",
+      "kind": "shipment",
+      "age": "age.2",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [],
+      "spawns": [
+        {
+          "id": "unit.hussar",
+          "count": 4
+        }
+      ],
+      "prerequisites": [],
+      "oncePerGame": false
+    },
+    {
+      "id": "ship.2_falconets",
+      "name": "2 Falconets",
+      "kind": "shipment",
+      "age": "age.3",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [],
+      "spawns": [
+        {
+          "id": "unit.falconet",
+          "count": 2
+        }
+      ],
+      "prerequisites": [],
+      "oncePerGame": false
+    },
+    {
+      "id": "ship.outpost_boost",
+      "name": "Fortified Outposts",
+      "kind": "shipment",
+      "age": "age.2",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [
+        {
+          "target": "bld.tower",
+          "stat": "hp",
+          "op": "mul",
+          "value": 1.5
+        },
+        {
+          "target": "bld.tower",
+          "stat": "attacks.*.damage",
+          "op": "mul",
+          "value": 1.25
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [],
+      "oncePerGame": true
+    }
+  ]
+}

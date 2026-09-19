@@ -78,12 +78,13 @@ namespace RTS.Tests
             int wood = w.Defs.Data.ResourceIndex("wood");
             int[] villagers = TestWorld.UnitsOf(w, 0, "unit.villager");
             Fix64 woodBefore = w.Players[0].Stockpile[wood];
+            Fix64 houseCost = w.DefsOf(0).Buildings[house].Cost[wood];   // civ passives may discount it
 
             // Valid placement near the town center.
             Assert.AreEqual(PlacementResult.Ok, BuildCommand.Validate(w, 0, house, 6, 8));
             m.Source.Submit(new BuildCommand(0, house, 6, 8, villagers));
             m.RunTicks(2);
-            Assert.AreEqual(woodBefore - Fix64.FromInt(100), w.Players[0].Stockpile[wood]);
+            Assert.AreEqual(woodBefore - houseCost, w.Players[0].Stockpile[wood]);
             Assert.AreEqual(1, w.Constructions.Count);
             Assert.That(w.Map.OccupantAt(6, 8), Is.GreaterThan(0));
 
@@ -91,14 +92,16 @@ namespace RTS.Tests
             m.Source.Submit(new BuildCommand(0, house, 6, 8, villagers));
             var events = TestWorld.RunCollecting(m, 2);
             Assert.AreEqual(1, w.Constructions.Count);
-            Assert.AreEqual(woodBefore - Fix64.FromInt(100), w.Players[0].Stockpile[wood]);
+            Assert.AreEqual(woodBefore - houseCost, w.Players[0].Stockpile[wood]);
             Assert.IsTrue(TestWorld.Has(events, SimEventKind.CommandRejected));
 
             // Cannot afford a town center (600 wood) → rejected.
             int tc = w.Defs.Data.BuildingIndex("bld.towncenter");
             Assert.AreEqual(PlacementResult.LimitReached, BuildCommand.Validate(w, 0, tc, 8, 20));
             int barracks = w.Defs.Data.BuildingIndex("bld.barracks");
-            Assert.AreEqual(PlacementResult.NotAffordable, BuildCommand.Validate(w, 0, barracks, 8, 20));
+            Assert.AreEqual(PlacementResult.WrongAge, BuildCommand.Validate(w, 0, barracks, 8, 20));
+            int mill = w.Defs.Data.BuildingIndex("bld.mill");
+            Assert.AreEqual(PlacementResult.NotAffordable, BuildCommand.Validate(w, 0, mill, 8, 20));
         }
 
         [Test]

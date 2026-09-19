@@ -13,6 +13,14 @@ namespace RTS.Sim.Model
         UnitTrained,           // Entity = new unit, A = building
         NodeDepleted,          // Entity = node
         CommandRejected,       // A = player, B = reason (CommandRejectReason)
+        Damaged,               // Entity = victim, A = attacker, Amount = damage
+        Died,                  // Entity = unit or building, A = killer player
+        ProjectileHit,         // Entity = projectile, A = target
+        AgeAdvanced,           // Entity = 0, A = player, B = new age index
+        ResearchFinished,      // Entity = building, A = player, B = tech index
+        ShipmentArrived,       // Entity = town center, A = player, B = tech index
+        MatchEnded,            // A = winner (-2 draw)
+        UnderAttack,           // Entity = victim, A = owner (throttled ping for the HUD)
     }
 
     public enum CommandRejectReason : byte
@@ -25,6 +33,10 @@ namespace RTS.Sim.Model
         QueueFull,
         PopulationCap,
         LimitReached,
+        WrongAge,
+        AlreadyResearched,
+        NotEnoughXp,
+        Busy,
     }
 
     /// <summary>

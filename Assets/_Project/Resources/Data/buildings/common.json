@@ -1,49 +1,372 @@
-{ "items": [
-  {
-    "id": "bld.towncenter", "name": "Town Center", "civ": "common", "age": "age.1",
-    "cost": { "wood": 600 }, "buildSeconds": 150, "footprint": [6, 6],
-    "stats": { "hp": 7200, "armor": { "siege": -0.2, "ranged": 0.6, "melee": 0.6 }, "los": 16 },
-    "placement": { "terrain": ["grass", "dirt", "sand"], "minDistanceToEnemyBuilding": 0, "requiresNear": null },
-    "trains": ["unit.villager"], "researches": [], "dropOff": ["food", "wood", "gold"],
-    "populationProvided": 10,
-    "attack": { "damage": 30, "type": "ranged", "range": 14, "cooldownSeconds": 2.5, "garrisonBonus": 0.1 },
-    "garrison": 20, "limit": 1, "queue": { "slots": 5, "parallel": 1 },
-    "view": { "prefab": "Buildings/TownCenter", "icon": "ui/bld/towncenter", "constructionPrefab": "Buildings/_Scaffold6x6" }
-  },
-  {
-    "id": "bld.house", "name": "House", "civ": "common", "age": "age.1",
-    "cost": { "wood": 100 }, "buildSeconds": 20, "footprint": [2, 2],
-    "stats": { "hp": 800, "armor": { "siege": -0.2, "ranged": 0.6, "melee": 0.6 }, "los": 6 },
-    "placement": { "terrain": ["grass", "dirt", "sand"], "minDistanceToEnemyBuilding": 0, "requiresNear": null },
-    "trains": [], "researches": [], "dropOff": [], "populationProvided": 10,
-    "attack": null, "garrison": 0, "limit": 20, "queue": { "slots": 0, "parallel": 0 },
-    "view": { "prefab": "Buildings/House", "icon": "ui/bld/house", "constructionPrefab": "Buildings/_Scaffold2x2" }
-  },
-  {
-    "id": "bld.mill", "name": "Mill", "civ": "common", "age": "age.1",
-    "cost": { "wood": 400 }, "buildSeconds": 40, "footprint": [3, 3],
-    "stats": { "hp": 1500, "armor": { "siege": -0.2, "ranged": 0.6, "melee": 0.6 }, "los": 6 },
-    "placement": { "terrain": ["grass", "dirt"], "minDistanceToEnemyBuilding": 0, "requiresNear": null },
-    "trains": [], "researches": [], "dropOff": ["food"], "populationProvided": 0,
-    "attack": null, "garrison": 0, "limit": 0, "queue": { "slots": 0, "parallel": 0 },
-    "view": { "prefab": "Buildings/Mill", "icon": "ui/bld/mill", "constructionPrefab": "Buildings/_Scaffold3x3" }
-  },
-  {
-    "id": "bld.barracks", "name": "Barracks", "civ": "common", "age": "age.2",
-    "cost": { "wood": 200 }, "buildSeconds": 45, "footprint": [4, 4],
-    "stats": { "hp": 2000, "armor": { "siege": -0.2, "ranged": 0.6, "melee": 0.6 }, "los": 10 },
-    "placement": { "terrain": ["grass", "dirt"], "minDistanceToEnemyBuilding": 0, "requiresNear": null },
-    "trains": ["unit.musketeer", "unit.pikeman"], "researches": ["tech.veteran_infantry"], "dropOff": [], "populationProvided": 0,
-    "attack": null, "garrison": 0, "limit": 0, "queue": { "slots": 5, "parallel": 1 },
-    "view": { "prefab": "Buildings/Barracks", "icon": "ui/bld/barracks", "constructionPrefab": "Buildings/_Scaffold4x4" }
-  },
-  {
-    "id": "bld.stable", "name": "Stable", "civ": "common", "age": "age.2",
-    "cost": { "wood": 200 }, "buildSeconds": 45, "footprint": [4, 4],
-    "stats": { "hp": 2000, "armor": { "siege": -0.2, "ranged": 0.6, "melee": 0.6 }, "los": 10 },
-    "placement": { "terrain": ["grass", "dirt"], "minDistanceToEnemyBuilding": 0, "requiresNear": null },
-    "trains": ["unit.hussar"], "researches": [], "dropOff": [], "populationProvided": 0,
-    "attack": null, "garrison": 0, "limit": 0, "queue": { "slots": 5, "parallel": 1 },
-    "view": { "prefab": "Buildings/Stable", "icon": "ui/bld/stable", "constructionPrefab": "Buildings/_Scaffold4x4" }
-  }
-]}
+{
+  "items": [
+    {
+      "id": "bld.towncenter",
+      "name": "Town Center",
+      "civ": "common",
+      "age": "age.1",
+      "cost": {
+        "wood": 600
+      },
+      "buildSeconds": 150,
+      "footprint": [
+        6,
+        6
+      ],
+      "stats": {
+        "hp": 7200,
+        "armor": {
+          "siege": -0.2,
+          "ranged": 0.6,
+          "melee": 0.6
+        },
+        "los": 16
+      },
+      "placement": {
+        "terrain": [
+          "grass",
+          "dirt",
+          "sand"
+        ],
+        "minDistanceToEnemyBuilding": 0,
+        "requiresNear": null
+      },
+      "trains": [
+        "unit.villager"
+      ],
+      "researches": [
+        "tech.hunting_dogs",
+        "tech.gang_saw",
+        "tech.placer_mines"
+      ],
+      "dropOff": [
+        "food",
+        "wood",
+        "gold"
+      ],
+      "populationProvided": 10,
+      "attack": {
+        "damage": 30,
+        "type": "ranged",
+        "range": 14,
+        "cooldownSeconds": 2.5,
+        "garrisonBonus": 0.1
+      },
+      "garrison": 20,
+      "limit": 1,
+      "queue": {
+        "slots": 5,
+        "parallel": 1
+      },
+      "view": {
+        "prefab": "Buildings/TownCenter",
+        "icon": "ui/bld/towncenter",
+        "constructionPrefab": "Buildings/_Scaffold6x6"
+      }
+    },
+    {
+      "id": "bld.house",
+      "name": "House",
+      "civ": "common",
+      "age": "age.1",
+      "cost": {
+        "wood": 100
+      },
+      "buildSeconds": 20,
+      "footprint": [
+        2,
+        2
+      ],
+      "stats": {
+        "hp": 800,
+        "armor": {
+          "siege": -0.2,
+          "ranged": 0.6,
+          "melee": 0.6
+        },
+        "los": 6
+      },
+      "placement": {
+        "terrain": [
+          "grass",
+          "dirt",
+          "sand"
+        ],
+        "minDistanceToEnemyBuilding": 0,
+        "requiresNear": null
+      },
+      "trains": [],
+      "researches": [],
+      "dropOff": [],
+      "populationProvided": 10,
+      "attack": null,
+      "garrison": 0,
+      "limit": 20,
+      "queue": {
+        "slots": 0,
+        "parallel": 0
+      },
+      "view": {
+        "prefab": "Buildings/House",
+        "icon": "ui/bld/house",
+        "constructionPrefab": "Buildings/_Scaffold2x2"
+      }
+    },
+    {
+      "id": "bld.mill",
+      "name": "Mill",
+      "civ": "common",
+      "age": "age.1",
+      "cost": {
+        "wood": 400
+      },
+      "buildSeconds": 40,
+      "footprint": [
+        3,
+        3
+      ],
+      "stats": {
+        "hp": 1500,
+        "armor": {
+          "siege": -0.2,
+          "ranged": 0.6,
+          "melee": 0.6
+        },
+        "los": 6
+      },
+      "placement": {
+        "terrain": [
+          "grass",
+          "dirt"
+        ],
+        "minDistanceToEnemyBuilding": 0,
+        "requiresNear": null
+      },
+      "trains": [],
+      "researches": [],
+      "dropOff": [
+        "food"
+      ],
+      "populationProvided": 0,
+      "attack": null,
+      "garrison": 0,
+      "limit": 0,
+      "queue": {
+        "slots": 0,
+        "parallel": 0
+      },
+      "view": {
+        "prefab": "Buildings/Mill",
+        "icon": "ui/bld/mill",
+        "constructionPrefab": "Buildings/_Scaffold3x3"
+      }
+    },
+    {
+      "id": "bld.tower",
+      "name": "Outpost",
+      "civ": "common",
+      "age": "age.1",
+      "cost": {
+        "wood": 250
+      },
+      "buildSeconds": 45,
+      "footprint": [
+        2,
+        2
+      ],
+      "stats": {
+        "hp": 1500,
+        "armor": {
+          "siege": -0.2,
+          "ranged": 0.6,
+          "melee": 0.6
+        },
+        "los": 14
+      },
+      "placement": {
+        "terrain": [
+          "grass",
+          "dirt",
+          "sand"
+        ],
+        "minDistanceToEnemyBuilding": 0,
+        "requiresNear": null
+      },
+      "trains": [],
+      "researches": [],
+      "dropOff": [],
+      "populationProvided": 0,
+      "attack": {
+        "damage": 25,
+        "type": "ranged",
+        "range": 12,
+        "cooldownSeconds": 2.0,
+        "garrisonBonus": 0.1
+      },
+      "garrison": 5,
+      "limit": 5,
+      "queue": {
+        "slots": 0,
+        "parallel": 0
+      },
+      "view": {
+        "prefab": "Buildings/Outpost",
+        "icon": "ui/bld/tower",
+        "constructionPrefab": "Buildings/_Scaffold2x2"
+      }
+    },
+    {
+      "id": "bld.barracks",
+      "name": "Barracks",
+      "civ": "common",
+      "age": "age.2",
+      "cost": {
+        "wood": 200
+      },
+      "buildSeconds": 45,
+      "footprint": [
+        4,
+        4
+      ],
+      "stats": {
+        "hp": 2000,
+        "armor": {
+          "siege": -0.2,
+          "ranged": 0.6,
+          "melee": 0.6
+        },
+        "los": 10
+      },
+      "placement": {
+        "terrain": [
+          "grass",
+          "dirt"
+        ],
+        "minDistanceToEnemyBuilding": 0,
+        "requiresNear": null
+      },
+      "trains": [
+        "unit.musketeer",
+        "unit.crossbowman",
+        "unit.pikeman"
+      ],
+      "researches": [
+        "tech.veteran_infantry"
+      ],
+      "dropOff": [],
+      "populationProvided": 0,
+      "attack": null,
+      "garrison": 0,
+      "limit": 0,
+      "queue": {
+        "slots": 5,
+        "parallel": 1
+      },
+      "view": {
+        "prefab": "Buildings/Barracks",
+        "icon": "ui/bld/barracks",
+        "constructionPrefab": "Buildings/_Scaffold4x4"
+      }
+    },
+    {
+      "id": "bld.stable",
+      "name": "Stable",
+      "civ": "common",
+      "age": "age.2",
+      "cost": {
+        "wood": 200
+      },
+      "buildSeconds": 45,
+      "footprint": [
+        4,
+        4
+      ],
+      "stats": {
+        "hp": 2000,
+        "armor": {
+          "siege": -0.2,
+          "ranged": 0.6,
+          "melee": 0.6
+        },
+        "los": 10
+      },
+      "placement": {
+        "terrain": [
+          "grass",
+          "dirt"
+        ],
+        "minDistanceToEnemyBuilding": 0,
+        "requiresNear": null
+      },
+      "trains": [
+        "unit.hussar"
+      ],
+      "researches": [
+        "tech.veteran_cavalry"
+      ],
+      "dropOff": [],
+      "populationProvided": 0,
+      "attack": null,
+      "garrison": 0,
+      "limit": 0,
+      "queue": {
+        "slots": 5,
+        "parallel": 1
+      },
+      "view": {
+        "prefab": "Buildings/Stable",
+        "icon": "ui/bld/stable",
+        "constructionPrefab": "Buildings/_Scaffold4x4"
+      }
+    },
+    {
+      "id": "bld.foundry",
+      "name": "Artillery Foundry",
+      "civ": "common",
+      "age": "age.3",
+      "cost": {
+        "wood": 300
+      },
+      "buildSeconds": 60,
+      "footprint": [
+        4,
+        4
+      ],
+      "stats": {
+        "hp": 2500,
+        "armor": {
+          "siege": -0.2,
+          "ranged": 0.6,
+          "melee": 0.6
+        },
+        "los": 10
+      },
+      "placement": {
+        "terrain": [
+          "grass",
+          "dirt"
+        ],
+        "minDistanceToEnemyBuilding": 0,
+        "requiresNear": null
+      },
+      "trains": [
+        "unit.falconet"
+      ],
+      "researches": [],
+      "dropOff": [],
+      "populationProvided": 0,
+      "attack": null,
+      "garrison": 0,
+      "limit": 0,
+      "queue": {
+        "slots": 5,
+        "parallel": 1
+      },
+      "view": {
+        "prefab": "Buildings/ArtilleryFoundry",
+        "icon": "ui/bld/foundry",
+        "constructionPrefab": "Buildings/_Scaffold4x4"
+      }
+    }
+  ]
+}

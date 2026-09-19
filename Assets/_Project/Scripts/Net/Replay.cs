@@ -15,7 +15,7 @@ namespace RTS.Net
     public static class ReplayFormat
     {
         public const uint Magic = 0x52545352;   // "RSTR"
-        public const ushort Version = 1;
+        public const ushort Version = 2;
         public const int HashInterval = 20;    // once per second at 20 Hz
 
         public const byte RecCommands = 1;
@@ -30,6 +30,8 @@ namespace RTS.Net
             w.Write(c.CivIds.Length);
             foreach (string civ in c.CivIds) w.Write(civ ?? "");
             w.Write(c.SpawnStartingUnits);
+            w.Write(c.Ai?.Length ?? 0);
+            if (c.Ai != null) foreach (AiDifficulty a in c.Ai) w.Write((byte)a);
         }
 
         public static WorldConfig ReadConfig(BinaryReader r)
@@ -39,6 +41,9 @@ namespace RTS.Net
             c.CivIds = new string[n];
             for (int i = 0; i < n; i++) c.CivIds[i] = r.ReadString();
             c.SpawnStartingUnits = r.ReadBoolean();
+            int ai = r.ReadInt32();
+            c.Ai = new AiDifficulty[ai];
+            for (int i = 0; i < ai; i++) c.Ai[i] = (AiDifficulty)r.ReadByte();
             return c;
         }
     }

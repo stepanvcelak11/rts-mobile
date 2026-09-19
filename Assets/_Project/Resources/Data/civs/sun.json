@@ -1,0 +1,72 @@
+{
+  "id": "civ.sun",
+  "name": "Sun Empire",
+  "tagline": "Swift villagers and jaguar warriors",
+  "color": "#F59E0B",
+  "startingUnits": [
+    {
+      "id": "unit.villager",
+      "count": 7
+    }
+  ],
+  "startingStockpile": {
+    "food": 250,
+    "wood": 200,
+    "gold": 50
+  },
+  "uniqueUnits": [
+    "unit.jaguar"
+  ],
+  "uniqueBuildings": [],
+  "replacements": {
+    "unit.pikeman": "unit.jaguar"
+  },
+  "modifiers": [
+    {
+      "target": "tag.villager",
+      "stat": "speed",
+      "op": "mul",
+      "value": 1.15
+    },
+    {
+      "target": "*",
+      "stat": "gather.res.berries",
+      "op": "mul",
+      "value": 1.15
+    },
+    {
+      "target": "*",
+      "stat": "gather.res.hunt",
+      "op": "mul",
+      "value": 1.15
+    },
+    {
+      "target": "bld.barracks",
+      "stat": "cost.wood",
+      "op": "mul",
+      "value": 0.8
+    }
+  ],
+  "homeCity": {
+    "xpPerShipmentBase": 300,
+    "xpGrowth": 1.25,
+    "deck": [
+      "ship.4_villagers",
+      "ship.700_food",
+      "ship.700_wood",
+      "ship.8_pikemen",
+      "ship.600_gold",
+      "ship.outpost_boost",
+      "ship.1000_wood"
+    ],
+    "deckSize": 8
+  },
+  "ai": {
+    "buildOrder": "bo.sun_boom",
+    "preferredComp": [
+      "unit.pikeman",
+      "unit.crossbowman",
+      "unit.hussar"
+    ]
+  }
+}

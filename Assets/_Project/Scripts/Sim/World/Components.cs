@@ -4,7 +4,7 @@ using RTS.Sim.Core;
 // never references — so the world can be hashed, copied and serialised trivially.
 namespace RTS.Sim.Model
 {
-    public enum EntityKind : byte { Unit = 1, Building = 2, ResourceNode = 3 }
+    public enum EntityKind : byte { Unit = 1, Building = 2, ResourceNode = 3, Projectile = 4 }
 
     /// <summary>Every live entity has one of these.</summary>
     public struct Identity : IHashable
@@ -55,14 +55,17 @@ namespace RTS.Sim.Model
         public void Hash(ref Hasher h) { h.Add(Hp); h.Add(MaxHp); }
     }
 
-    /// <summary>Straight-line steering target. Phase 3 replaces the target with a flow-field lookup.</summary>
+    /// <summary>Steering state. With a flow field the unit follows the field; without one it walks a straight line.</summary>
     public struct Mover : IHashable
     {
         public Fix64 Speed;          // cells per second
-        public FixVec2 Target;
+        public FixVec2 Target;       // point goal (or approach point when GoalEntity is set)
+        public int GoalEntity;       // building / node whose footprint is the goal, 0 = point goal
         public bool Moving;
+        public int StuckTicks;       // consecutive ticks with almost no displacement
+        public FixVec2 Velocity;     // last applied displacement (for separation priority + views)
 
-        public void Hash(ref Hasher h) { h.Add(Speed); h.Add(Target); h.Add(Moving); }
+        public void Hash(ref Hasher h) { h.Add(Speed); h.Add(Target); h.Add(GoalEntity); h.Add(Moving); h.Add(StuckTicks); h.Add(Velocity); }
     }
 
     public enum UnitState : byte
@@ -72,8 +75,10 @@ namespace RTS.Sim.Model
         Gather = 2,       // walking to / working at a resource node
         ReturnCargo = 3,  // walking to a drop-off
         Build = 4,        // walking to / working at a construction site
-        Attack = 5,       // phase 3
+        Attack = 5,       // chasing / hitting TargetEntity
         Dead = 6,
+        AttackMove = 7,   // walking to TargetPos, engaging anything met on the way
+        Flee = 8,         // villager running to the nearest town center
     }
 
     /// <summary>Finite-state-machine state of a unit. Allocation-free; transitions live in BehaviorSystem.</summary>
@@ -84,8 +89,54 @@ namespace RTS.Sim.Model
         public FixVec2 TargetPos;    // for Move
         public int LastNode;         // node to return to after depositing cargo
         public int Timer;            // generic countdown in ticks
+        public int Cooldown;         // ticks until the next attack
+        public int LastAttacker;     // who hit us last (defensive retaliation, fleeing)
+        public FixVec2 LeashOrigin;  // where the unit stood when it started chasing
+        public FixVec2 ResumePos;    // attack-move destination to resume after a fight
+        public UnitState ResumeState;
 
-        public void Hash(ref Hasher h) { h.Add((byte)State); h.Add(TargetEntity); h.Add(TargetPos); h.Add(LastNode); h.Add(Timer); }
+        public void Hash(ref Hasher h)
+        {
+            h.Add((byte)State); h.Add(TargetEntity); h.Add(TargetPos); h.Add(LastNode); h.Add(Timer);
+            h.Add(Cooldown); h.Add(LastAttacker); h.Add(LeashOrigin); h.Add(ResumePos); h.Add((byte)ResumeState);
+        }
+    }
+
+    /// <summary>A building that shoots (town center, tower).</summary>
+    public struct Turret : IHashable
+    {
+        public int Target;
+        public int Cooldown;
+
+        public void Hash(ref Hasher h) { h.Add(Target); h.Add(Cooldown); }
+    }
+
+    /// <summary>An in-flight ranged attack. Homing: it hits its target when TicksLeft reaches 0.</summary>
+    public struct Projectile : IHashable
+    {
+        public int Source;           // entity that fired (may be dead by impact time)
+        public int SourcePlayer;
+        public EntityKind SourceKind; // Unit or Building
+        public int SourceDef;        // unit / building def index
+        public int AttackIndex;      // which attack of the source def (multipliers, damage type)
+        public int Target;
+        public int TicksLeft;
+        public int TotalTicks;
+        public FixVec2 Start;
+
+        public void Hash(ref Hasher h)
+        {
+            h.Add(Source); h.Add(SourcePlayer); h.Add((byte)SourceKind); h.Add(SourceDef); h.Add(AttackIndex); h.Add(Target); h.Add(TicksLeft); h.Add(TotalTicks); h.Add(Start);
+        }
+    }
+
+    /// <summary>A technology being researched at a building (one at a time).</summary>
+    public struct Research : IHashable
+    {
+        public int Tech;
+        public int Remaining;
+
+        public void Hash(ref Hasher h) { h.Add(Tech); h.Add(Remaining); }
     }
 
     /// <summary>Cargo carried by a gatherer.</summary>
@@ -162,6 +213,16 @@ namespace RTS.Sim.Model
             SetSlot(Count, 0);
             HeadRemaining = Count > 0 ? nextTicks : 0;
             return head;
+        }
+
+        /// <summary>Removes the last queued item (cancel). Returns its def index.</summary>
+        public int RemoveLast()
+        {
+            int last = Get(Count - 1);
+            Count--;
+            SetSlot(Count, 0);
+            if (Count == 0) HeadRemaining = 0;
+            return last;
         }
 
         public void Hash(ref Hasher h)

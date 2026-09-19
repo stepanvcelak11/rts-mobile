@@ -76,6 +76,9 @@ namespace RTS.Sim.Model
             return true;
         }
 
+        /// <summary>Dense position of an entity (O(1)), or -1.</summary>
+        public int IndexOf(int entity) => Has(entity) ? _sparse[entity] - 1 : -1;
+
         /// <summary>Entity id at dense position i (for iteration by index).</summary>
         public int EntityAt(int i) => _entities[i];
 

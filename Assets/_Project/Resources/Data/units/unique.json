@@ -1,0 +1,185 @@
+{
+  "items": [
+    {
+      "id": "unit.redcoat",
+      "name": "Redcoat",
+      "civ": "civ.crown",
+      "age": "age.2",
+      "trainedAt": [],
+      "cost": {
+        "food": 80,
+        "gold": 25
+      },
+      "trainSeconds": 30,
+      "population": 1,
+      "batchSize": 5,
+      "stats": {
+        "hp": 170,
+        "speed": 4.0,
+        "los": 12,
+        "armor": {
+          "melee": 0.2,
+          "ranged": 0,
+          "siege": 0
+        },
+        "sizeClass": "small"
+      },
+      "attacks": [
+        {
+          "id": "ranged",
+          "damage": 24,
+          "type": "ranged",
+          "range": 12,
+          "minRange": 0,
+          "cooldownSeconds": 3.0,
+          "projectile": "proj.bullet",
+          "multipliers": {
+            "tag.villager": 1.5
+          }
+        },
+        {
+          "id": "melee",
+          "damage": 14,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {
+            "tag.cavalry": 3.0
+          }
+        }
+      ],
+      "tags": [
+        "tag.infantry",
+        "tag.gunpowder"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "defensive",
+        "leashRange": 8,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Redcoat",
+        "icon": "ui/units/redcoat",
+        "scale": 1.0,
+        "voiceSet": "vo.redcoat"
+      }
+    },
+    {
+      "id": "unit.uhlan",
+      "name": "Uhlan",
+      "civ": "civ.compact",
+      "age": "age.2",
+      "trainedAt": [],
+      "cost": {
+        "food": 100,
+        "gold": 70
+      },
+      "trainSeconds": 38,
+      "population": 2,
+      "batchSize": 3,
+      "stats": {
+        "hp": 240,
+        "speed": 7.25,
+        "los": 12,
+        "armor": {
+          "melee": 0.1,
+          "ranged": 0.1,
+          "siege": 0
+        },
+        "sizeClass": "medium"
+      },
+      "attacks": [
+        {
+          "id": "melee",
+          "damage": 26,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {
+            "tag.villager": 2.0,
+            "tag.artillery": 3.0,
+            "tag.ranged": 1.5
+          }
+        }
+      ],
+      "tags": [
+        "tag.cavalry",
+        "tag.melee"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "aggressive",
+        "leashRange": 14,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Uhlan",
+        "icon": "ui/units/uhlan",
+        "scale": 1.0,
+        "voiceSet": "vo.uhlan"
+      }
+    },
+    {
+      "id": "unit.jaguar",
+      "name": "Jaguar Warrior",
+      "civ": "civ.sun",
+      "age": "age.2",
+      "trainedAt": [],
+      "cost": {
+        "food": 60,
+        "gold": 30
+      },
+      "trainSeconds": 28,
+      "population": 1,
+      "batchSize": 5,
+      "stats": {
+        "hp": 180,
+        "speed": 5.0,
+        "los": 10,
+        "armor": {
+          "melee": 0.2,
+          "ranged": 0.1,
+          "siege": 0
+        },
+        "sizeClass": "small"
+      },
+      "attacks": [
+        {
+          "id": "melee",
+          "damage": 14,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {
+            "tag.infantry": 2.0,
+            "tag.cavalry": 1.5,
+            "tag.building": 2.0
+          }
+        }
+      ],
+      "tags": [
+        "tag.infantry",
+        "tag.melee"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "defensive",
+        "leashRange": 9,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/JaguarWarrior",
+        "icon": "ui/units/jaguar",
+        "scale": 1.0,
+        "voiceSet": "vo.jaguar"
+      }
+    }
+  ]
+}

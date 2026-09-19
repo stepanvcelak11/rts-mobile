@@ -40,6 +40,7 @@ namespace RTS.Sim.Model
         UnevenGround,
         LimitReached,
         NotAffordable,
+        WrongAge,
     }
 
     /// <summary>

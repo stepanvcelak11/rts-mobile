@@ -1,6 +1,7 @@
 using System.IO;
 using RTS.Data;
 using RTS.Net;
+using RTS.Sim.Core;
 using RTS.Sim.Model;
 
 namespace RTS.Tests
@@ -58,6 +59,12 @@ namespace RTS.Tests
         {
             foreach (SimEvent ev in events) if (ev.Kind == kind) return true;
             return false;
+        }
+
+        /// <summary>Fixed-point equality with a 0.001 tolerance (products of decimals like 1.1 are not exact in Q32.32).</summary>
+        public static void AssertFix(decimal expected, Fix64 actual, string message = null)
+        {
+            NUnit.Framework.Assert.That(actual.ToDecimal(), NUnit.Framework.Is.EqualTo(expected).Within(0.001m), message);
         }
 
         /// <summary>First live entity matching a predicate, or 0.</summary>

@@ -41,7 +41,9 @@ namespace RTS.Sim.Systems
             }
 
             Identity id = w.Identities.Get(e);
-            Fix64 rate = node.RatePerTick * w.Defs.Units[id.DefIndex].GatherRateMultiplier;
+            BakedDefs defs = w.DefsOf(id.Player);
+            Fix64 rate = node.RatePerTick * defs.Units[id.DefIndex].GatherRateMultiplier
+                         * defs.GatherMultiplier[w.Identities.Get(b.TargetEntity).DefIndex];
             Fix64 room = cargo.Capacity - cargo.Amount;
             Fix64 take = FixMath.Min(rate, room);
             if (node.Depletes) take = FixMath.Min(take, node.Amount);
@@ -67,12 +69,13 @@ namespace RTS.Sim.Systems
 
             int player = w.Identities.Get(e).Player;
             if (player < 0 || target.Player != player) return;
-            if (!w.Defs.Buildings[target.DefIndex].DropOff[cargo.Resource]) return;
+            if (!w.DefsOf(player).Buildings[target.DefIndex].DropOff[cargo.Resource]) return;
 
             PlayerState ps = w.Players[player];
             Fix64 amount = cargo.Amount;
             ps.Stockpile[cargo.Resource] = FixMath.Min(ps.Stockpile[cargo.Resource] + amount, w.Defs.StockpileCap);
             w.Events.Add(new SimEvent(SimEventKind.ResourceDeposited, e, cargo.Resource, b.TargetEntity, amount));
+            w.AddXp(player, amount);   // Home-City XP: 1 per resource brought home
 
             cargo.Amount = Fix64.Zero;
             cargo.Accumulator = Fix64.Zero;
