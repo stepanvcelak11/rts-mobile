@@ -17,7 +17,8 @@ namespace RTS.Presentation
         [Header("Match")]
         [SerializeField] private uint seed = 1;
         [SerializeField] private string mapId = "map.default";
-        [SerializeField] private string[] civIds = { "civ.crown", "civ.crown" };
+        [SerializeField] private string[] civIds = { "civ.crown", "civ.compact" };
+        [SerializeField] private AiDifficulty[] ai = { AiDifficulty.None, AiDifficulty.Normal };
         [SerializeField] private int localPlayer = 0;
         [SerializeField] private bool recordReplay = true;
 
@@ -35,6 +36,7 @@ namespace RTS.Presentation
         public ICommandSource Source => Runner.Source;
         public int LocalPlayer => localPlayer;
         public float Alpha => Runner.Alpha;
+        public bool MatchOver => Runner.World.Winner != -1;
 
         /// <summary>Raised once the world exists (UI/Input bind here).</summary>
         public event Action<GameBootstrap> MatchStarted;
@@ -47,7 +49,8 @@ namespace RTS.Presentation
             Application.targetFrameRate = 60;
 
             Data = JsonLoader.Load(new ResourcesDataSource());
-            var config = new WorldConfig { Seed = seed, MapId = mapId, CivIds = civIds, PlayerCount = civIds.Length };
+            if (seed == 0) seed = (uint)System.Environment.TickCount;
+            var config = new WorldConfig { Seed = seed, MapId = mapId, CivIds = civIds, PlayerCount = civIds.Length, Ai = ai };
 
             ICommandSource source = new LocalCommandSource();
             if (recordReplay)

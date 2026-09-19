@@ -21,16 +21,20 @@ plain .NET assembly with **no UnityEngine reference** — it also compiles as
 - [x] Phase 1 — architecture & technical spec
 - [x] Phase 2 — deterministic sim core (Fix64, world, commands, replay), map grid +
       footprint validation, camera rig, gestures, economy loop (gather → deposit →
-      return), construction & training, HUD, 20 NUnit tests
-- [ ] Phase 3 — selection polish, flow-field pathfinding, combat, skirmish AI
-- [ ] Phase 4 — 3 civilizations, full mobile HUD (minimap, cards, queues)
+      return), construction & training
+- [x] Phase 3 — flow-field pathfinding + separation, combat (armor, multipliers,
+      projectiles, turrets), unit FSM with attack/attack-move/flee, skirmish AI (3 levels)
+- [x] Phase 4 — 3 civilizations with unique units and passives, ages, techs, Home-City
+      shipments, full mobile HUD (minimap, cards, queues, radial menu, box select)
+- 37 NUnit tests green, including AI-vs-AI determinism and replay playback
 
 ## Getting started
 
 ### Headless (no Unity needed)
 ```
 dotnet build sim/RTS.Sim.csproj
-dotnet test  sim/tests/RTS.Sim.Tests.csproj     # 20 tests, ~1 s
+dotnet test  sim/tests/RTS.Sim.Tests.csproj     # 37 tests, ~15 s
+python tools/gen_data.py                        # regenerate balance JSON from one table
 python tools/validate_data.py                   # schema + cross-reference check
 python tools/check_deps.py                      # Sim/Data/Net stay engine-free
 ```
@@ -42,11 +46,14 @@ python tools/check_deps.py                      # Sim/Data/Net stay engine-free
    the camera rig, HUD panel settings and wires everything. Re-run any time.
 3. Press Play.
 
-Controls in the editor: left-drag pans, wheel zooms, click selects, click a tree /
-berries / mine with villagers selected to gather, click the ground to move. On a
-device: one-finger drag pans, pinch zooms, tap selects/acts (see docs/03).
-Build: select villagers → bottom sheet → House / Mill / Barracks → tap the ground
-(green ghost = valid). Select the Town Center → Villager to train.
+Controls in the editor: left-drag pans, wheel zooms, click selects, click again on the
+same unit to grab its type nearby, hold + drag for a box selection, hold still for the
+radial menu (Move / Attack / Stop). Click a tree / berries / mine with villagers to
+gather, an enemy with soldiers to attack, the ground to move. On a device: one-finger
+drag pans, pinch zooms, tap/long-press as above (see docs/03).
+Build: select villagers → bottom sheet → building → tap the ground (green ghost = valid).
+Town Center: train villagers, research, Age up. Top bar: Shipments opens the Home City
+deck once you have enough XP. The opponent is a Normal AI by default (GameBootstrap).
 
 Every match is recorded to `<persistentDataPath>/replays/*.rts`; the same file
 replays to bit-identical `StateHash` values (see `Replay_ReproducesIdenticalHashes`).

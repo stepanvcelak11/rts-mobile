@@ -74,19 +74,19 @@ reference UnityEngine, or if `Sim` uses float/double outside lines marked
   interpolates between the last two sim snapshots (`alpha = accumulator/dt`).
 - Commands issued at tick *T* execute at *T + inputDelay*
   (local: 1 tick, lockstep MP: 3–6 ticks, adaptive).
-- `World.Step` runs systems in a **fixed order**:
-  1. `CommandSystem` — applies this tick's commands (sorted by playerId, seq).
-  2. `AISystem` — sim-side skirmish AI emits commands for *next* tick (so it is
+- `World.Step` runs in a **fixed order** (as built):
+  1. Commands of this tick (sorted by player), then the AI commands queued last tick.
+  2. `UnitGrid.Rebuild` — spatial buckets for the tick.
+  3. `AISystem` — sim-side skirmish AI queues commands for the *next* tick (so it is
      deterministic across peers; AI runs on every machine identically).
-  3. `ProductionSystem` — build queues, research, construction progress.
-  4. `EconomySystem` — gather/deposit, trickles, upkeep.
-  5. `BehaviorSystem` — unit FSM transitions.
-  6. `PathSystem` — flow-field requests, steering, local avoidance.
-  7. `MovementSystem` — integrate positions, grid occupancy.
-  8. `CombatSystem` — targeting, cooldowns, projectiles, damage.
-  9. `DeathSystem` — cleanup, corpses, refund on cancel.
-  10. `VictorySystem` — win/lose conditions.
-  11. `HashSystem`.
+  4. `ProductionSystem` — construction, training queues, research, age-up, shipment availability.
+  5. `EconomySystem` — gather/deposit (+ Home-City XP).
+  6. `BehaviorSystem` — unit FSM transitions and movement goals.
+  7. `MovementSystem` — flow-field following, separation, collision, stuck-arrival.
+  8. `CombatSystem` — cooldowns, firing, turrets, projectiles, damage, kills.
+  9. `DeathSystem` — despawn dead units.
+  10. `VictorySystem` — defeat/victory once per second.
+  11. Despawn flush, tick++, `ComputeHash`.
 
 ### 3.3 Multiplayer readiness
 `ICommandSource` is the only seam:
@@ -140,9 +140,10 @@ FSM is allocation-free.
 - Editor importer generates read-only ScriptableObject mirrors for
   inspector convenience and validates references (`tools/validate_data.py`
   does the same in CI without Unity).
-- Civ modifiers are applied at load: `GameData.ForCiv(civId)` returns a
-  baked, per-civ copy of definitions (so the sim never evaluates modifiers
-  per tick).
+- Civ modifiers are applied at match start: every player gets
+  `BakedDefs.CloneForPlayer()` with `Modifiers.ApplyCiv` on it; researched techs and
+  shipments keep mutating that clone (`World.DefsOf(player)`), so the per-tick
+  systems only ever read plain numbers.
 - Schema: [02-DATA-SCHEMA.md](02-DATA-SCHEMA.md).
 
 ## 5. Presentation (`RTS.Presentation`)
@@ -188,13 +189,13 @@ rts-mobile/
       ├─ Scripts/
       │  ├─ Sim/        RTS.Sim.asmdef       (NO UnityEngine)      namespace RTS.Sim.*
       │  │  ├─ Core/     Fix64, FixVec2, FixMath, DetRandom, Hasher, SimConstants
-      │  │  ├─ World/    World, ComponentStore, Components, Baked, PlayerState, SimEvent, ISystem
-      │  │  ├─ Map/      GridMap (terrain, occupancy, footprint validation, ring search)
+      │  │  ├─ World/    World, ComponentStore, Components, Baked (per-player defs), Modifiers, PlayerState, SimEvent, ISystem
+      │  │  ├─ Map/      GridMap, FlowField + FlowFieldCache, UnitGrid (spatial buckets)
       │  │  ├─ Commands/ ICommand, TickCommands, Move/Stop/Gather/Build/Train, CommandCodec
       │  │  ├─ Economy/  EconomySystem (gather/deposit), ProductionSystem (construction, queues)
       │  │  ├─ Units/    BehaviorSystem (FSM), MovementSystem
-      │  │  ├─ Combat/   (phase 3)
-      │  │  └─ AI/       (phase 3)
+      │  │  ├─ Combat/   CombatSystem (damage, projectiles, turrets), DeathSystem, VictorySystem
+      │  │  └─ AI/       AISystem (rule-based skirmish opponent, 3 difficulties)
       │  ├─ Data/        RTS.Data.asmdef      Defs (POCO, decimal), GameData, JsonLoader, IDataSource
       │  ├─ Net/         RTS.Net.asmdef       ICommandSource, LocalCommandSource, Replay*, MatchRunner, IMatchSession
       │  ├─ Presentation/ RTS.Presentation.asmdef  GameBootstrap, WorldView, EntityView, GroundView, ViewCatalog

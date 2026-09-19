@@ -27,8 +27,11 @@ namespace RTS.UI
         private void OnMatchStarted(GameBootstrap b)
         {
             player.Bind(b, FallbackMaterials.GhostOk, FallbackMaterials.GhostBad);
-            hud.Bind(b, player);
+            ViewCatalog catalog = b.View.Catalog;
+            hud.Bind(b, player, new ViewCatalogColors(p => catalog != null ? catalog.PlayerColor(p) : (p == 0 ? Color.cyan : Color.red)));
             gestures.IsPointerOverUI = hud.IsPointerOver;
+            gestures.Tap += _ => hud.HideRadial();
+            gestures.LongPressDrag += (_, __) => hud.HideRadial();
             player.SelectionChanged += RefreshSelectionRings;
         }
 

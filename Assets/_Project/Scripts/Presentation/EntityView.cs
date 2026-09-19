@@ -6,33 +6,46 @@ namespace RTS.Presentation
 {
     /// <summary>
     /// Visual for one simulation entity. Keeps the previous and current tick positions and
-    /// interpolates between them at display rate. Construction sites grow with progress.
+    /// interpolates between them at display rate. Construction sites grow with progress;
+    /// a health bar appears while the entity is damaged or selected.
     /// </summary>
     public sealed class EntityView : MonoBehaviour
     {
         public int Entity { get; private set; }
         public EntityKind Kind { get; private set; }
+        public int Player { get; private set; }
 
         private Vector3 _prev, _cur;
         private Quaternion _prevRot, _curRot;
         private Transform _model;
         private Transform _selectionRing;
+        private Transform _healthRoot, _healthFill;
+        private Renderer _healthFillRenderer;
         private Renderer[] _renderers;
         private MaterialPropertyBlock _mpb;
         private float _fullHeight = 1f;
+        private float _barHeight = 1.2f;
+        private float _hpFraction = 1f;
+        private bool _selected;
         private static readonly int ColorId = Shader.PropertyToID("_BaseColor");
         private static readonly int LegacyColorId = Shader.PropertyToID("_Color");
 
-        public void Init(int entity, EntityKind kind, Transform model, Color tint)
+        public void Init(int entity, EntityKind kind, int player, Transform model, Color tint, float barHeight)
         {
             Entity = entity;
             Kind = kind;
+            Player = player;
             _model = model;
             _renderers = model.GetComponentsInChildren<Renderer>();
             _mpb = new MaterialPropertyBlock();
             Tint(tint);
             _fullHeight = model.localScale.y;
-            _selectionRing = CreateSelectionRing(model);
+            _barHeight = barHeight;
+            if (kind == EntityKind.Unit || kind == EntityKind.Building)
+            {
+                _selectionRing = CreateSelectionRing(model);
+                CreateHealthBar();
+            }
             _prev = _cur = transform.position;
             _prevRot = _curRot = transform.rotation;
         }
@@ -45,7 +58,7 @@ namespace RTS.Presentation
         }
 
         /// <summary>Called once per simulation tick with the new authoritative state.</summary>
-        public void OnTick(Vector3 position, Vector3 facing, float constructionProgress)
+        public void OnTick(Vector3 position, Vector3 facing, float constructionProgress, float hpFraction)
         {
             _prev = _cur;
             _prevRot = _curRot;
@@ -66,6 +79,8 @@ namespace RTS.Presentation
                 _model.localScale = s;
                 _model.localPosition = new Vector3(_model.localPosition.x, s.y * 0.5f, _model.localPosition.z);
             }
+
+            SetHealth(hpFraction);
         }
 
         /// <summary>Snap without interpolation (spawn).</summary>
@@ -79,11 +94,65 @@ namespace RTS.Presentation
         {
             transform.position = Vector3.LerpUnclamped(_prev, _cur, alpha);
             transform.rotation = Quaternion.Slerp(_prevRot, _curRot, alpha);
+            if (_healthRoot != null) _healthRoot.rotation = Quaternion.identity;   // bars never rotate with the model
         }
 
         public void SetSelected(bool selected)
         {
+            _selected = selected;
             if (_selectionRing != null) _selectionRing.gameObject.SetActive(selected);
+            RefreshHealthVisibility();
+        }
+
+        private void SetHealth(float fraction)
+        {
+            fraction = Mathf.Clamp01(fraction);
+            if (Mathf.Approximately(fraction, _hpFraction)) { RefreshHealthVisibility(); return; }
+            _hpFraction = fraction;
+            if (_healthFill != null)
+            {
+                Vector3 s = _healthFill.localScale;
+                s.x = Mathf.Max(0.001f, fraction);
+                _healthFill.localScale = s;
+                _healthFill.localPosition = new Vector3(-(1f - fraction) * 0.5f, 0f, -0.001f);
+                _healthFillRenderer.sharedMaterial = fraction > 0.5f ? FallbackMaterials.HealthGood : fraction > 0.25f ? FallbackMaterials.HealthWarn : FallbackMaterials.HealthBad;
+            }
+            RefreshHealthVisibility();
+        }
+
+        private void RefreshHealthVisibility()
+        {
+            if (_healthRoot == null) return;
+            bool show = _selected || _hpFraction < 0.999f;
+            if (_healthRoot.gameObject.activeSelf != show) _healthRoot.gameObject.SetActive(show);
+        }
+
+        private void CreateHealthBar()
+        {
+            var root = new GameObject("HealthBar");
+            root.transform.SetParent(transform, false);
+            root.transform.localPosition = new Vector3(0f, _barHeight, 0f);
+            float width = Kind == EntityKind.Building ? Mathf.Max(1.2f, _model.localScale.x * 0.8f) : 0.8f;
+            root.transform.localScale = new Vector3(width, 0.12f, 1f);
+
+            var back = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            Object.Destroy(back.GetComponent<Collider>());
+            back.transform.SetParent(root.transform, false);
+            back.GetComponent<Renderer>().sharedMaterial = FallbackMaterials.HealthBack;
+
+            var fill = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            Object.Destroy(fill.GetComponent<Collider>());
+            fill.transform.SetParent(root.transform, false);
+            fill.transform.localPosition = new Vector3(0f, 0f, -0.001f);
+            _healthFillRenderer = fill.GetComponent<Renderer>();
+            _healthFillRenderer.sharedMaterial = FallbackMaterials.HealthGood;
+
+            // Face the camera once (the boom yaw/pitch is fixed); cheap billboard.
+            Camera cam = Camera.main;
+            if (cam != null) root.transform.rotation = cam.transform.rotation;
+            _healthRoot = root.transform;
+            _healthFill = fill.transform;
+            root.SetActive(false);
         }
 
         private static Transform CreateSelectionRing(Transform model)
@@ -102,15 +171,45 @@ namespace RTS.Presentation
         }
     }
 
+    /// <summary>Short-lived shrink-and-sink effect played where a unit or building died.</summary>
+    public sealed class DeathFx : MonoBehaviour
+    {
+        private float _t;
+        private const float Duration = 0.6f;
+
+        public static void Play(Transform model, Vector3 position)
+        {
+            if (model == null) return;
+            var go = new GameObject("DeathFx");
+            go.transform.position = position;
+            model.SetParent(go.transform, true);
+            go.AddComponent<DeathFx>();
+        }
+
+        private void Update()
+        {
+            _t += Time.deltaTime;
+            float k = 1f - Mathf.Clamp01(_t / Duration);
+            transform.localScale = new Vector3(k, k, k);
+            transform.position += Vector3.down * (Time.deltaTime * 0.8f);
+            if (_t >= Duration) Destroy(gameObject);
+        }
+    }
+
     /// <summary>Runtime materials for the no-art fallback. Uses URP Lit/Unlit when present, Standard otherwise.</summary>
     public static class FallbackMaterials
     {
-        private static Material _lit, _selection, _ghostOk, _ghostBad;
+        private static Material _lit, _selection, _ghostOk, _ghostBad, _projectile, _healthBack, _healthGood, _healthWarn, _healthBad;
 
         public static Material Lit => _lit ??= Make("Universal Render Pipeline/Lit", "Standard", Color.white);
         public static Material Selection => _selection ??= Make("Universal Render Pipeline/Unlit", "Unlit/Color", new Color(1f, 1f, 1f, 0.9f));
         public static Material GhostOk => _ghostOk ??= Make("Universal Render Pipeline/Unlit", "Unlit/Color", new Color(0.3f, 0.9f, 0.4f, 0.6f), transparent: true);
         public static Material GhostBad => _ghostBad ??= Make("Universal Render Pipeline/Unlit", "Unlit/Color", new Color(0.95f, 0.3f, 0.25f, 0.6f), transparent: true);
+        public static Material Projectile => _projectile ??= Make("Universal Render Pipeline/Unlit", "Unlit/Color", new Color(0.15f, 0.12f, 0.1f));
+        public static Material HealthBack => _healthBack ??= Make("Universal Render Pipeline/Unlit", "Unlit/Color", new Color(0.1f, 0.1f, 0.12f));
+        public static Material HealthGood => _healthGood ??= Make("Universal Render Pipeline/Unlit", "Unlit/Color", new Color(0.3f, 0.85f, 0.35f));
+        public static Material HealthWarn => _healthWarn ??= Make("Universal Render Pipeline/Unlit", "Unlit/Color", new Color(0.95f, 0.75f, 0.2f));
+        public static Material HealthBad => _healthBad ??= Make("Universal Render Pipeline/Unlit", "Unlit/Color", new Color(0.9f, 0.25f, 0.2f));
 
         private static bool UsingUrp => UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline != null;
 
