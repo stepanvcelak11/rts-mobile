@@ -5,7 +5,7 @@ decimals with ≤ 3 decimals** (parsed straight into `Fix64`; no float
 round-trip). Times are in **ticks** unless the key ends in `Seconds`
 (then converted at load: `seconds × 20`). Distances in **cells** (1 cell = 1 m).
 
-Files: `Assets/_Project/Data/`
+Files: `Assets/_Project/Resources/Data/`
 ```
 economy.json            resources, gather rates, stockpile caps, market
 ages.json               Age I–IV, cost, what unlocks

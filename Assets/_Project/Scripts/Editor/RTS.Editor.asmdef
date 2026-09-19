@@ -1,1 +1,1 @@
-{ "name": "RTS.Editor", "rootNamespace": "RTS.Editor", "references": ["RTS.Sim", "RTS.Data", "RTS.Presentation", "RTS.Input", "RTS.UI"], "includePlatforms": ["Editor"], "autoReferenced": false }
+{ "name": "RTS.Editor", "rootNamespace": "RTS.Editor", "references": ["RTS.Sim", "RTS.Data", "RTS.Net", "RTS.Presentation", "RTS.Input", "RTS.UI", "Unity.RenderPipelines.Universal.Runtime"], "includePlatforms": ["Editor"], "autoReferenced": false }

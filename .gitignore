@@ -16,8 +16,8 @@ MemoryCaptures/
 .idea/
 # keep the headless sim project
 !sim/RTS.Sim.csproj
-!sim/RTS.Sim.Tests.csproj
+!sim/tests/RTS.Sim.Tests.csproj
 # dotnet
-sim/bin/
-sim/obj/
+sim/**/bin/
+sim/**/obj/
 __pycache__/

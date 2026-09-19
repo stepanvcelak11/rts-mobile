@@ -1,0 +1,551 @@
+{
+ "id": "map.default",
+ "name": "Two Rivers",
+ "size": [
+  64,
+  64
+ ],
+ "players": 2,
+ "patches": [
+  {
+   "x": 0,
+   "y": 30,
+   "w": 10,
+   "h": 3,
+   "terrain": "water"
+  },
+  {
+   "x": 54,
+   "y": 30,
+   "w": 10,
+   "h": 3,
+   "terrain": "water"
+  },
+  {
+   "x": 20,
+   "y": 0,
+   "w": 24,
+   "h": 4,
+   "terrain": "sand"
+  },
+  {
+   "x": 20,
+   "y": 60,
+   "w": 24,
+   "h": 4,
+   "terrain": "sand"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "res.berries",
+   "x": 21,
+   "y": 12
+  },
+  {
+   "id": "res.mine",
+   "x": 12,
+   "y": 21
+  },
+  {
+   "id": "res.tree",
+   "x": 13,
+   "y": 7
+  },
+  {
+   "id": "res.tree",
+   "x": 15,
+   "y": 23
+  },
+  {
+   "id": "res.tree",
+   "x": 4,
+   "y": 5
+  },
+  {
+   "id": "res.tree",
+   "x": 20,
+   "y": 6
+  },
+  {
+   "id": "res.tree",
+   "x": 4,
+   "y": 19
+  },
+  {
+   "id": "res.tree",
+   "x": 9,
+   "y": 4
+  },
+  {
+   "id": "res.tree",
+   "x": 5,
+   "y": 16
+  },
+  {
+   "id": "res.tree",
+   "x": 16,
+   "y": 5
+  },
+  {
+   "id": "res.tree",
+   "x": 10,
+   "y": 5
+  },
+  {
+   "id": "res.tree",
+   "x": 4,
+   "y": 21
+  },
+  {
+   "id": "res.tree",
+   "x": 6,
+   "y": 10
+  },
+  {
+   "id": "res.tree",
+   "x": 23,
+   "y": 23
+  },
+  {
+   "id": "res.tree",
+   "x": 21,
+   "y": 4
+  },
+  {
+   "id": "res.tree",
+   "x": 21,
+   "y": 21
+  },
+  {
+   "id": "res.tree",
+   "x": 15,
+   "y": 4
+  },
+  {
+   "id": "res.tree",
+   "x": 10,
+   "y": 4
+  },
+  {
+   "id": "res.tree",
+   "x": 20,
+   "y": 7
+  },
+  {
+   "id": "res.tree",
+   "x": 7,
+   "y": 20
+  },
+  {
+   "id": "res.tree",
+   "x": 6,
+   "y": 21
+  },
+  {
+   "id": "res.tree",
+   "x": 24,
+   "y": 8
+  },
+  {
+   "id": "res.tree",
+   "x": 21,
+   "y": 23
+  },
+  {
+   "id": "res.tree",
+   "x": 6,
+   "y": 20
+  },
+  {
+   "id": "res.hunt",
+   "x": 6,
+   "y": 22
+  },
+  {
+   "id": "res.hunt",
+   "x": 5,
+   "y": 23
+  },
+  {
+   "id": "res.berries",
+   "x": 42,
+   "y": 48
+  },
+  {
+   "id": "res.mine",
+   "x": 48,
+   "y": 41
+  },
+  {
+   "id": "res.tree",
+   "x": 60,
+   "y": 56
+  },
+  {
+   "id": "res.tree",
+   "x": 53,
+   "y": 57
+  },
+  {
+   "id": "res.tree",
+   "x": 44,
+   "y": 61
+  },
+  {
+   "id": "res.tree",
+   "x": 46,
+   "y": 41
+  },
+  {
+   "id": "res.tree",
+   "x": 57,
+   "y": 48
+  },
+  {
+   "id": "res.tree",
+   "x": 48,
+   "y": 58
+  },
+  {
+   "id": "res.tree",
+   "x": 41,
+   "y": 42
+  },
+  {
+   "id": "res.tree",
+   "x": 43,
+   "y": 54
+  },
+  {
+   "id": "res.tree",
+   "x": 52,
+   "y": 40
+  },
+  {
+   "id": "res.tree",
+   "x": 60,
+   "y": 41
+  },
+  {
+   "id": "res.tree",
+   "x": 56,
+   "y": 57
+  },
+  {
+   "id": "res.tree",
+   "x": 61,
+   "y": 50
+  },
+  {
+   "id": "res.tree",
+   "x": 58,
+   "y": 54
+  },
+  {
+   "id": "res.tree",
+   "x": 57,
+   "y": 53
+  },
+  {
+   "id": "res.tree",
+   "x": 41,
+   "y": 41
+  },
+  {
+   "id": "res.tree",
+   "x": 61,
+   "y": 60
+  },
+  {
+   "id": "res.tree",
+   "x": 41,
+   "y": 40
+  },
+  {
+   "id": "res.tree",
+   "x": 61,
+   "y": 48
+  },
+  {
+   "id": "res.tree",
+   "x": 59,
+   "y": 57
+  },
+  {
+   "id": "res.hunt",
+   "x": 40,
+   "y": 54
+  },
+  {
+   "id": "res.tree",
+   "x": 35,
+   "y": 29
+  },
+  {
+   "id": "res.tree",
+   "x": 27,
+   "y": 39
+  },
+  {
+   "id": "res.tree",
+   "x": 25,
+   "y": 30
+  },
+  {
+   "id": "res.tree",
+   "x": 33,
+   "y": 28
+  },
+  {
+   "id": "res.tree",
+   "x": 31,
+   "y": 36
+  },
+  {
+   "id": "res.tree",
+   "x": 36,
+   "y": 39
+  },
+  {
+   "id": "res.tree",
+   "x": 26,
+   "y": 29
+  },
+  {
+   "id": "res.tree",
+   "x": 38,
+   "y": 36
+  },
+  {
+   "id": "res.tree",
+   "x": 32,
+   "y": 28
+  },
+  {
+   "id": "res.tree",
+   "x": 37,
+   "y": 32
+  },
+  {
+   "id": "res.tree",
+   "x": 37,
+   "y": 35
+  },
+  {
+   "id": "res.tree",
+   "x": 36,
+   "y": 31
+  },
+  {
+   "id": "res.tree",
+   "x": 28,
+   "y": 26
+  },
+  {
+   "id": "res.tree",
+   "x": 29,
+   "y": 28
+  },
+  {
+   "id": "res.tree",
+   "x": 31,
+   "y": 31
+  },
+  {
+   "id": "res.tree",
+   "x": 24,
+   "y": 39
+  },
+  {
+   "id": "res.tree",
+   "x": 29,
+   "y": 32
+  },
+  {
+   "id": "res.tree",
+   "x": 33,
+   "y": 24
+  },
+  {
+   "id": "res.tree",
+   "x": 28,
+   "y": 37
+  },
+  {
+   "id": "res.tree",
+   "x": 35,
+   "y": 34
+  },
+  {
+   "id": "res.tree",
+   "x": 28,
+   "y": 40
+  },
+  {
+   "id": "res.tree",
+   "x": 25,
+   "y": 38
+  },
+  {
+   "id": "res.tree",
+   "x": 36,
+   "y": 36
+  },
+  {
+   "id": "res.tree",
+   "x": 36,
+   "y": 25
+  },
+  {
+   "id": "res.tree",
+   "x": 30,
+   "y": 26
+  },
+  {
+   "id": "res.tree",
+   "x": 30,
+   "y": 38
+  },
+  {
+   "id": "res.tree",
+   "x": 29,
+   "y": 27
+  },
+  {
+   "id": "res.tree",
+   "x": 34,
+   "y": 25
+  },
+  {
+   "id": "res.tree",
+   "x": 27,
+   "y": 24
+  },
+  {
+   "id": "res.tree",
+   "x": 28,
+   "y": 27
+  },
+  {
+   "id": "res.tree",
+   "x": 35,
+   "y": 24
+  },
+  {
+   "id": "res.tree",
+   "x": 26,
+   "y": 30
+  },
+  {
+   "id": "res.tree",
+   "x": 36,
+   "y": 28
+  },
+  {
+   "id": "res.tree",
+   "x": 32,
+   "y": 35
+  },
+  {
+   "id": "res.tree",
+   "x": 35,
+   "y": 39
+  },
+  {
+   "id": "res.tree",
+   "x": 27,
+   "y": 27
+  },
+  {
+   "id": "res.tree",
+   "x": 39,
+   "y": 38
+  },
+  {
+   "id": "res.tree",
+   "x": 39,
+   "y": 39
+  },
+  {
+   "id": "res.tree",
+   "x": 33,
+   "y": 26
+  },
+  {
+   "id": "res.tree",
+   "x": 34,
+   "y": 32
+  },
+  {
+   "id": "res.tree",
+   "x": 39,
+   "y": 29
+  },
+  {
+   "id": "res.tree",
+   "x": 40,
+   "y": 24
+  },
+  {
+   "id": "res.tree",
+   "x": 30,
+   "y": 40
+  },
+  {
+   "id": "res.tree",
+   "x": 35,
+   "y": 28
+  },
+  {
+   "id": "res.tree",
+   "x": 24,
+   "y": 40
+  },
+  {
+   "id": "res.tree",
+   "x": 32,
+   "y": 40
+  },
+  {
+   "id": "res.tree",
+   "x": 35,
+   "y": 31
+  },
+  {
+   "id": "res.tree",
+   "x": 40,
+   "y": 34
+  },
+  {
+   "id": "res.tree",
+   "x": 31,
+   "y": 30
+  },
+  {
+   "id": "res.tree",
+   "x": 40,
+   "y": 39
+  },
+  {
+   "id": "res.tree",
+   "x": 24,
+   "y": 32
+  },
+  {
+   "id": "res.tree",
+   "x": 39,
+   "y": 32
+  }
+ ],
+ "starts": [
+  {
+   "x": 14,
+   "y": 14
+  },
+  {
+   "x": 50,
+   "y": 50
+  }
+ ]
+}

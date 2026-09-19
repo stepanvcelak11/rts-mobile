@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Assets/_Project/Data/**.json against the rules in docs/02-DATA-SCHEMA.md.
+"""Validate Assets/_Project/Resources/Data/**.json against the rules in docs/02-DATA-SCHEMA.md.
 
 Runs without Unity (CI + pre-commit). Exit code 1 on any error.
 """
@@ -9,7 +9,7 @@ import os
 import sys
 from decimal import Decimal
 
-ROOT = os.path.join(os.path.dirname(__file__), "..", "Assets", "_Project", "Data")
+ROOT = os.path.join(os.path.dirname(__file__), "..", "Assets", "_Project", "Resources", "Data")
 errors: list[str] = []
 
 
@@ -134,11 +134,23 @@ def main() -> int:
         for p in t.get("prerequisites", []):
             ref(t, "prerequisites", p)
 
+    maps = items_of("maps")
+    node_ids = {n["id"] for n in economy["resourceNodes"]}
+    for m in maps:
+        w, h = m["size"]
+        for n in m.get("nodes", []):
+            if n["id"] not in node_ids:
+                err(f"{m['_file']} {m['id']}: node '{n['id']}' unknown")
+            if not (0 <= n["x"] < w and 0 <= n["y"] < h):
+                err(f"{m['_file']} {m['id']}: node at ({n['x']},{n['y']}) outside {w}x{h}")
+        if len(m.get("starts", [])) < m.get("players", 2):
+            err(f"{m['_file']} {m['id']}: fewer starts than players")
+
     if errors:
         print("\n".join(errors))
         print(f"\n{len(errors)} error(s)")
         return 1
-    print(f"data ok: {len(units)} units, {len(buildings)} buildings, {len(civs)} civs, {len(techs)} techs")
+    print(f"data ok: {len(units)} units, {len(buildings)} buildings, {len(civs)} civs, {len(techs)} techs, {len(maps)} maps")
     return 0
 
 

@@ -1,1 +1,1 @@
-{ "name": "RTS.Presentation", "rootNamespace": "RTS.Presentation", "references": ["RTS.Sim", "RTS.Data"], "autoReferenced": true }
+{ "name": "RTS.Presentation", "rootNamespace": "RTS.Presentation", "references": ["RTS.Sim", "RTS.Data", "RTS.Net"], "autoReferenced": true }

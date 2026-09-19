@@ -4,14 +4,17 @@
 Deliverables: engine decision, layer diagram, folder structure, data schema,
 control scheme. Acceptance: a new engineer can place a file without asking.
 
-## Phase 2 — Core foundation & MVP
-1. `GridMap` (cells, terrain flags, passability), `Footprint` validation.
-2. Camera rig: pan (inertia), pinch zoom, clamp to map bounds.
-3. Resource stockpile + `GatherSystem` (gather → deposit → return).
-4. Building placement: ghost preview, footprint validation, construction progress.
-5. Deterministic tick loop with `CommandBuffer`, replay file.
-Acceptance: place a Town Center, 3 villagers cycle Food/Wood/Gold, replay
-of 5 minutes reproduces the same `StateHash` on a second run.
+## Phase 2 — Core foundation & MVP ✅
+1. `GridMap` (terrain, occupancy), footprint validation with every failure reason.
+2. Camera rig: ground-anchored pan with inertia, anchored pinch zoom, rubber-band clamp.
+3. Stockpile + `EconomySystem`: gather → deposit → return, node depletion + re-target.
+4. Building placement: ghost preview, `BuildCommand.Validate`, construction with
+   builder scaling, training queues with population gate.
+5. Deterministic tick loop (`World.Step`), `ICommandSource`, replay recorder/player.
+Verified: `dotnet test` — 20 tests incl. `Replay_ReproducesIdenticalHashes`
+(60 s scripted match, every tick's hash identical on playback).
+Not yet: pathfinding (units walk straight lines and slide along obstacles),
+attack orders, cancel/refund, civ modifiers (`CivBaker`).
 
 ## Phase 3 — RTS combat & AI
 1. Smart-tap / box selection, control groups.

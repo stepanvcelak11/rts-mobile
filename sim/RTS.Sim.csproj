@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Headless build of the engine-free assemblies (Data + Sim + Net). Unity compiles the same
+       sources through the asmdefs; this project exists for `dotnet test` and dedicated servers. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <RootNamespace>RTS</RootNamespace>
+    <AssemblyName>RTS.Sim</AssemblyName>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../Assets/_Project/Scripts/Data/**/*.cs" />
+    <Compile Include="../Assets/_Project/Scripts/Sim/**/*.cs" />
+    <Compile Include="../Assets/_Project/Scripts/Net/**/*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,1 @@
+{ "name": "RTS.Tests.PlayMode", "references": ["RTS.Sim", "RTS.Data", "RTS.Net", "RTS.Presentation", "RTS.Input", "RTS.UI", "UnityEngine.TestRunner", "UnityEditor.TestRunner"], "precompiledReferences": ["nunit.framework.dll"], "overrideReferences": true, "defineConstraints": ["UNITY_INCLUDE_TESTS"] }

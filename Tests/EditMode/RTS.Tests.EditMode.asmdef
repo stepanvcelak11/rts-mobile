@@ -1,1 +1,0 @@
-{ "name": "RTS.Tests.EditMode", "references": ["RTS.Sim", "RTS.Data", "UnityEngine.TestRunner", "UnityEditor.TestRunner"], "includePlatforms": ["Editor"], "precompiledReferences": ["nunit.framework.dll"], "overrideReferences": true, "defineConstraints": ["UNITY_INCLUDE_TESTS"] }

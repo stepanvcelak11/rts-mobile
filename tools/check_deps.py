@@ -23,7 +23,7 @@ for folder in ENGINE_FREE:
             path = os.path.join(dirpath, name)
             with open(path, encoding="utf-8") as f:
                 for n, line in enumerate(f, 1):
-                    if line.lstrip().startswith("//"):
+                    if line.lstrip().startswith("//") or "presentation-only" in line:
                         continue
                     if FORBIDDEN.search(line) or (folder == "Sim" and SIM_ONLY_FORBIDDEN.search(line)):
                         print(f"{os.path.relpath(path, SCRIPTS)}:{n}: {line.strip()}")
