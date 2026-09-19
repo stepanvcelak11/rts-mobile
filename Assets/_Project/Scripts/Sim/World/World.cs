@@ -326,8 +326,41 @@ namespace RTS.Sim.Model
             return best;
         }
 
+        /// <summary>
+        /// Like <see cref="FindNearestNode"/> but only nodes with a free cell in the ring around them:
+        /// a tree deep inside a forest cannot be worked, the one on the edge can.
+        /// </summary>
+        public int FindNearestReachableNode(FixVec2 from, int resource, Fix64 radius, int exclude = 0)
+        {
+            int best = 0;
+            Fix64 bestD = radius * radius;
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                ref ResourceNode n = ref Nodes.At(i);
+                int e = Nodes.EntityAt(i);
+                if (e == exclude || n.Resource != resource || n.IsDepleted) continue;
+                Footprint fp = Footprints.Get(e);
+                Fix64 d = fp.DistanceSqTo(from);
+                if (d > bestD || (d == bestD && best != 0 && e > best)) continue;
+                if (!Map.FindFreeCellAround(fp, 1, out _)) continue;
+                bestD = d; best = e;
+            }
+            return best;
+        }
+
+        /// <summary>
+        /// True when <paramref name="unit"/> can work on <paramref name="target"/>: within reach, or stalled
+        /// (blocked by a crowd) and within reach plus a little slack.
+        /// </summary>
+        public bool CanInteract(int unit, int target, Fix64 reach)
+        {
+            if (IsAdjacent(unit, target, reach)) return true;
+            return Behaviours.TryGet(unit, out UnitBehaviour b) && b.Stalled >= SimConstants.StallTicks
+                && IsAdjacent(unit, target, reach + SimConstants.StallReachSlack);
+        }
+
         /// <summary>Nearest completed building of <paramref name="player"/> that accepts <paramref name="resource"/>. 0 if none.</summary>
-        public int FindNearestDropOff(FixVec2 from, int player, int resource)
+        public int FindNearestDropOff(FixVec2 from, int player, int resource, int exclude = 0)
         {
             int best = 0;
             Fix64 bestD = Fix64.MaxValue;
@@ -336,7 +369,7 @@ namespace RTS.Sim.Model
                 ref Identity id = ref Identities.At(i);
                 if (id.Kind != EntityKind.Building || id.Player != player) continue;
                 int e = Identities.EntityAt(i);
-                if (Constructions.Has(e)) continue;
+                if (e == exclude || Constructions.Has(e)) continue;
                 BakedBuilding b = DefsOf(player).Buildings[id.DefIndex];
                 if (resource < 0 || resource >= b.DropOff.Length || !b.DropOff[resource]) continue;
                 Fix64 d = Footprints.Get(e).DistanceSqTo(from);

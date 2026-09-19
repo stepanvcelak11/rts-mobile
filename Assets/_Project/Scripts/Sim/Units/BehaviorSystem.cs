@@ -284,18 +284,46 @@ namespace RTS.Sim.Systems
                 b.LastNode = replacement;
             }
 
-            if (w.IsAdjacent(e, b.TargetEntity, SimConstants.InteractReach))
+            if (w.CanInteract(e, b.TargetEntity, SimConstants.InteractReach))
             {
                 m.Moving = false;          // EconomySystem gathers while we stand here
                 m.GoalEntity = 0;
+                if (w.IsAdjacent(e, b.TargetEntity, SimConstants.InteractReach)) b.Stalled = 0;   // slack reach must persist
                 FaceTowards(w, e, w.Footprints.Get(b.TargetEntity).Center);
+                return;
             }
-            else
+
+            // Standing still without being in reach: the node is walled in (tree deep in a forest) or a
+            // crowd blocks the last step. CanInteract already grants a little slack; if that was not
+            // enough, switch to the nearest node of the same resource that has a free cell next to it.
+            if (NoteStall(w, e, ref b) && b.Stalled >= SimConstants.StallTicks * 2)
             {
-                m.Target = ApproachPoint(w, e, b.TargetEntity);
-                m.GoalEntity = b.TargetEntity;
-                m.Moving = true;
+                int resource = w.Nodes.Get(b.TargetEntity).Resource;
+                FixVec2 here = w.Positions.Get(e).Value;
+                int alt = w.FindNearestReachableNode(here, resource, SimConstants.StallRetargetRadius, b.TargetEntity);
+                if (alt == 0) alt = w.FindNearestReachableNode(here, resource, SimConstants.NodeSearchRadius, b.TargetEntity);
+                b.Stalled = 0;
+                if (alt != 0) { b.TargetEntity = alt; b.LastNode = alt; }
+                else if (!cargo.IsEmpty) { SetState(w, e, ref b, UnitState.ReturnCargo); b.TargetEntity = 0; return; }
+                else { m.Moving = false; SetState(w, e, ref b, UnitState.Idle); return; }
             }
+            m.Target = ApproachPoint(w, e, b.TargetEntity);
+            m.GoalEntity = b.TargetEntity;
+            m.Moving = true;
+        }
+
+        /// <summary>
+        /// Counts ticks in which the unit did not get any closer to its target entity (crowd, walled-in
+        /// node, oscillating path). True while stalled. Progress resets the counter.
+        /// </summary>
+        private static bool NoteStall(World w, int e, ref UnitBehaviour b)
+        {
+            if (b.StallTarget != b.TargetEntity) { b.StallTarget = b.TargetEntity; b.StallBest = Fix64.MaxValue; b.Stalled = 0; }
+            Fix64 d = w.Footprints.TryGet(b.TargetEntity, out Footprint fp) ? fp.DistanceSqTo(w.Positions.Get(e).Value)
+                : w.Positions.TryGet(b.TargetEntity, out Position tp) ? FixVec2.DistanceSq(tp.Value, w.Positions.Get(e).Value) : Fix64.Zero;
+            if (d + Fix64.Ratio(1, 5) < b.StallBest) { b.StallBest = d; b.Stalled = 0; }   // creeping a hair closer is not progress
+            else b.Stalled++;
+            return b.Stalled >= SimConstants.StallTicks;
         }
 
         private static void TickReturn(World w, int e, ref UnitBehaviour b, ref Mover m)
@@ -335,17 +363,23 @@ namespace RTS.Sim.Systems
                 }
             }
 
-            if (w.IsAdjacent(e, b.TargetEntity, w.Defs.DepositRadius))
+            if (w.CanInteract(e, b.TargetEntity, w.Defs.DepositRadius))
             {
                 m.Moving = false;          // EconomySystem deposits
                 m.GoalEntity = 0;
+                if (w.IsAdjacent(e, b.TargetEntity, w.Defs.DepositRadius)) b.Stalled = 0;
+                return;
             }
-            else
+            // Blocked on the way home for a long time: try another drop-off (the crowd may sit at this one).
+            if (NoteStall(w, e, ref b) && b.Stalled >= SimConstants.StallTicks * 3)
             {
-                m.Target = ApproachPoint(w, e, b.TargetEntity);
-                m.GoalEntity = b.TargetEntity;
-                m.Moving = true;
+                int other = w.FindNearestDropOff(w.Positions.Get(e).Value, player, cargo.Resource, b.TargetEntity);
+                b.Stalled = 0;
+                if (other != 0) b.TargetEntity = other;
             }
+            m.Target = ApproachPoint(w, e, b.TargetEntity);
+            m.GoalEntity = b.TargetEntity;
+            m.Moving = true;
         }
 
         private static void TickBuild(World w, int e, ref UnitBehaviour b, ref Mover m)
@@ -358,15 +392,17 @@ namespace RTS.Sim.Systems
                 return;
             }
 
-            if (w.IsAdjacent(e, b.TargetEntity, SimConstants.InteractReach))
+            if (w.CanInteract(e, b.TargetEntity, SimConstants.InteractReach))
             {
                 m.Moving = false;
                 m.GoalEntity = 0;
+                if (w.IsAdjacent(e, b.TargetEntity, SimConstants.InteractReach)) b.Stalled = 0;
                 w.Constructions.Get(b.TargetEntity).BuildersThisTick++;
                 FaceTowards(w, e, w.Footprints.Get(b.TargetEntity).Center);
             }
             else
             {
+                NoteStall(w, e, ref b);
                 m.Target = ApproachPoint(w, e, b.TargetEntity);
                 m.GoalEntity = b.TargetEntity;
                 m.Moving = true;

@@ -95,11 +95,15 @@ namespace RTS.Sim.Model
         public FixVec2 ResumePos;    // attack-move destination to resume after a fight
         public UnitState ResumeState;
         public Stance Stance;        // player override of the definition aggro
+        public int Stalled;          // ticks without getting closer to StallTarget (crowd / walled-in node)
+        public int StallTarget;      // entity the stall counter refers to
+        public Fix64 StallBest;      // closest squared distance reached so far to StallTarget
 
         public void Hash(ref Hasher h)
         {
             h.Add((byte)State); h.Add(TargetEntity); h.Add(TargetPos); h.Add(LastNode); h.Add(Timer);
             h.Add(Cooldown); h.Add(LastAttacker); h.Add(LeashOrigin); h.Add(ResumePos); h.Add((byte)ResumeState); h.Add((byte)Stance);
+            h.Add(Stalled); h.Add(StallTarget); h.Add(StallBest);
         }
     }
 

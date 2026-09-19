@@ -4,9 +4,12 @@ using RTS.Sim.Model;
 namespace RTS.Sim.Systems
 {
     /// <summary>
-    /// Gathering and depositing. A villager in Gather state standing next to its node fills its
-    /// cargo at the node rate; one in ReturnCargo state next to a drop-off empties it into the
-    /// player stockpile. State transitions themselves belong to BehaviorSystem.
+    /// Gathering. As in Age of Empires III a villager in Gather state standing next to its node feeds
+    /// the player stockpile directly every tick: no cargo, no walking home. Camps near the work site
+    /// speed the work up. The Cargo component only tracks the resource being worked and the amount
+    /// gathered since the last <see cref="SimEventKind.ResourceDeposited"/> event (used for floating
+    /// "+5 wood" texts). Depositing remains for units that still carry something (treasure pickup).
+    /// State transitions themselves belong to BehaviorSystem.
     /// </summary>
     public sealed class EconomySystem : ISystem
     {
@@ -27,7 +30,7 @@ namespace RTS.Sim.Systems
         {
             if (cargo.IsFull) return;
             if (!w.Nodes.Has(b.TargetEntity)) return;
-            if (!w.IsAdjacent(e, b.TargetEntity, SimConstants.InteractReach)) return;
+            if (!w.CanInteract(e, b.TargetEntity, SimConstants.InteractReach)) return;
 
             ref ResourceNode node = ref w.Nodes.Get(b.TargetEntity);
             if (node.IsDepleted || node.Resource < 0) return;
@@ -49,7 +52,7 @@ namespace RTS.Sim.Systems
                 return;
             }
 
-            // Switching resource drops the old cargo (AoE rule).
+            // Switching resource restarts the event counter.
             if (cargo.Resource != node.Resource)
             {
                 cargo.Resource = node.Resource;
@@ -58,13 +61,23 @@ namespace RTS.Sim.Systems
             }
 
             Identity id = w.Identities.Get(e);
+            if (id.Player < 0) return;
             BakedDefs defs = w.DefsOf(id.Player);
             Fix64 rate = node.RatePerTick * defs.Units[id.DefIndex].GatherRateMultiplier * defs.GatherMultiplier[node.Def];
-            Fix64 room = cargo.Capacity - cargo.Amount;
-            Fix64 take = FixMath.Min(rate, room);
+            if (NearOwnCamp(w, id.Player, w.Positions.Get(e).Value, node.Resource)) rate *= SimConstants.CampAuraBonus;
+            Fix64 take = rate;
             if (node.Depletes) take = FixMath.Min(take, node.Amount);
 
-            cargo.Amount += take;
+            // Straight into the stockpile (AoE3 trickle); Home-City XP 1 per resource.
+            PlayerState stock = w.Players[id.Player];
+            stock.Stockpile[node.Resource] = FixMath.Min(stock.Stockpile[node.Resource] + take, w.Defs.StockpileCap);
+            w.AddXp(id.Player, take);
+            cargo.Accumulator += take;
+            if (cargo.Accumulator >= SimConstants.TrickleEventEvery)
+            {
+                w.Events.Add(new SimEvent(SimEventKind.ResourceDeposited, e, node.Resource, b.TargetEntity, SimConstants.TrickleEventEvery));
+                cargo.Accumulator -= SimConstants.TrickleEventEvery;
+            }
             if (node.Depletes)
             {
                 node.Amount -= take;
@@ -76,12 +89,29 @@ namespace RTS.Sim.Systems
             }
         }
 
+        /// <summary>A completed own building that accepts <paramref name="resource"/> (other than the town centre) within the aura radius.</summary>
+        private static bool NearOwnCamp(World w, int player, FixVec2 at, int resource)
+        {
+            BakedDefs defs = w.DefsOf(player);
+            Fix64 r2 = SimConstants.CampAuraRadius * SimConstants.CampAuraRadius;
+            for (int i = 0; i < w.Footprints.Count; i++)
+            {
+                int e = w.Footprints.EntityAt(i);
+                if (!w.Identities.TryGet(e, out Identity id) || id.Kind != EntityKind.Building || id.Player != player) continue;
+                if (w.Constructions.Has(e)) continue;
+                BakedBuilding bd = defs.Buildings[id.DefIndex];
+                if (bd.Id == "bld.towncenter" || resource >= bd.DropOff.Length || !bd.DropOff[resource]) continue;
+                if (w.Footprints.At(i).DistanceSqTo(at) <= r2) return true;
+            }
+            return false;
+        }
+
         private static void Deposit(World w, int e, ref Cargo cargo, ref UnitBehaviour b)
         {
             if (cargo.IsEmpty || cargo.Resource < 0) return;
             if (!w.Identities.TryGet(b.TargetEntity, out Identity target) || target.Kind != EntityKind.Building) return;
             if (w.Constructions.Has(b.TargetEntity)) return;
-            if (!w.IsAdjacent(e, b.TargetEntity, w.Defs.DepositRadius)) return;
+            if (!w.CanInteract(e, b.TargetEntity, w.Defs.DepositRadius)) return;
 
             int player = w.Identities.Get(e).Player;
             if (player < 0 || target.Player != player) return;

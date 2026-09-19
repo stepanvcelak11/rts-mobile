@@ -215,7 +215,7 @@ public static partial class GameApi
                 if (u.Attacks.Length > 0 && u.Attacks[0].HasProjectile) flags |= 256;
                 UnitBehaviour b = w.Behaviours.Get(e);
                 state = (int)b.State;
-                if (w.Cargos.TryGet(e, out Cargo cargo) && !cargo.IsEmpty) flags |= 512 | (cargo.Resource << 14);
+                if (w.Cargos.TryGet(e, out Cargo cargo) && cargo.Resource >= 0 && b.State == UnitState.Gather) flags |= 512 | (cargo.Resource << 14);   // working: resource dot
                 if (w.Movers.Get(e).Moving) flags |= 16384 << 4;
                 if (b.State == UnitState.Attack && u.Attacks.Length > 0 && b.Cooldown > u.Attacks[0].CooldownTicks - 4) flags |= 1 << 20;   // just fired
             }
@@ -605,7 +605,7 @@ public static partial class GameApi
         Health h = w.Healths.Get(e);
         string s = u.Def.name + "  ·  " + h.Hp.RoundToInt() + "/" + h.MaxHp.RoundToInt() + " hp";
         UnitState st = w.Behaviours.Get(e).State;
-        if (w.Cargos.TryGet(e, out Cargo cargo) && !cargo.IsEmpty) s += "  ·  carrying " + cargo.Amount.FloorToInt() + " " + w.Defs.Data.Economy.resources[cargo.Resource];
+        if (w.Cargos.Has(e) && w.Behaviours.Get(e).State == UnitState.Gather && w.Nodes.TryGet(w.Behaviours.Get(e).TargetEntity, out ResourceNode gn) && gn.Resource >= 0) s += "  ·  gathering " + w.Defs.Data.Economy.resources[gn.Resource];
         s += "  ·  " + st.ToString().ToLowerInvariant();
         return s;
     }
@@ -639,7 +639,7 @@ public static partial class GameApi
     {
         var parts = new List<string> { "HP " + b.Hp.RoundToInt(), b.W + "×" + b.H };
         if (b.PopulationProvided > 0) parts.Add("+" + b.PopulationProvided + " population");
-        if (b.DropOff.Length > 0) { bool any = false; foreach (bool d in b.DropOff) any |= d; if (any) parts.Add("resource drop-off"); }
+        if (b.Id != "bld.towncenter" && b.DropOff.Length > 0) { bool any = false; foreach (bool d in b.DropOff) any |= d; if (any) parts.Add("+25 % gathering within 10 cells"); }
         if (b.Trains.Length > 0) parts.Add("trains units");
         if (b.Attack != null) parts.Add("shoots, range " + b.Attack.Range.RoundToInt());
         if (b.GatherNode >= 0) parts.Add("infinite farm plots (send villagers here)");

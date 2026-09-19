@@ -130,7 +130,8 @@ namespace RTS.Sim.Systems
                     if (m.StuckTicks >= StuckTicksToArrive)
                     {
                         Fix64 goalDist = m.GoalEntity > 0 ? w.EdgeDistance(e, m.GoalEntity) : FixVec2.Distance(p.Value, m.Target);
-                        if (goalDist <= StuckArriveRadius) { m.Moving = false; m.StuckTicks = 0; }
+                        // Keep StuckTicks so a behaviour that re-issues the move every tick can see the stall.
+                        if (goalDist <= StuckArriveRadius) { m.Moving = false; m.StuckTicks = StuckTicksToArrive; }
                     }
                     if (FixMath.WithinDistance(p.Value, m.Target, SimConstants.ArriveRadius))
                     {

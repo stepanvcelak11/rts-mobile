@@ -31,6 +31,17 @@ namespace RTS.Sim.Core
 
         /// <summary>Extra reach (cells) beyond the target footprint edge for gathering/building.</summary>
         public static readonly Fix64 InteractReach = Fix64.Ratio(3, 4);
+        /// <summary>Ticks a worker may stand without progress before it is considered stalled.</summary>
+        public const int StallTicks = 20;
+        /// <summary>Extra reach granted to a stalled worker (crowd around a bush or a drop-off).</summary>
+        public static readonly Fix64 StallReachSlack = Fix64.One;
+        /// <summary>Gathered resources reach the stockpile continuously (AoE3); a deposit event fires every this many units per villager.</summary>
+        public static readonly Fix64 TrickleEventEvery = Fix64.FromInt(5);
+        /// <summary>Villagers working within this distance of an own camp that accepts the resource gather faster.</summary>
+        public static readonly Fix64 CampAuraRadius = Fix64.FromInt(10);
+        public static readonly Fix64 CampAuraBonus = Fix64.Ratio(5, 4);
+        /// <summary>How far a stalled gatherer looks for a reachable node of the same resource before the wide search.</summary>
+        public static readonly Fix64 StallRetargetRadius = Fix64.FromInt(4);
 
         /// <summary>How far a villager searches for another node of the same resource after depletion.</summary>
         public static readonly Fix64 NodeSearchRadius = Fix64.FromInt(20);

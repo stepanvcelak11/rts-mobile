@@ -61,6 +61,13 @@ Verified: 10-minute Hard-vs-Hard match is deterministic (same hash twice), 468 h
   `pointercancel` never counts as a tap, `touch-action: none` on the canvas, build stamp in the
   lobby + cache-busted assets (`?v=<sha>`), `tools/play_test.py` (real touch taps, asserts that
   resources grow) run against the live site after every deploy.
+- Round 4 (the real cause of "they walk there but nothing comes in"): a villager sent to a tree
+  deep inside a forest could never get within reach and stood at the forest edge forever; crowds
+  around a bush or the town centre blocked the last step. Fix: progress-based stall detection
+  (`UnitBehaviour.Stalled`), extra reach for stalled workers, retargeting to a reachable node
+  (`FindNearestReachableNode`), another drop-off when blocked. Gathering is now the AoE3 trickle:
+  resources flow straight into the stockpile every tick (no cargo trips), lumber/mining camps
+  are +25 % auras within 10 cells. 50 sim tests incl. `GatheringRobustnessTests`.
 
 ## Next (Phase 6 candidates)
 - Formations and group speed matching; hierarchical pathfinding for 128×128+ maps.

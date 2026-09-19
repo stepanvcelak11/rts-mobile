@@ -32,8 +32,8 @@ single object for civs. Ids are globally unique strings with a prefix.
     "res.tree":      { "wood": 0.50 },
     "res.mine":      { "gold": 0.50 }
   },
-  "carryCapacity": 10,                // per villager; cargo type is exclusive
-  "depositRadius": 1.5,               // cells from drop-off footprint edge
+  "carryCapacity": 10,                // legacy: gathering trickles straight into the stockpile (AoE3); cargo is only used for treasures
+  "depositRadius": 1.5,               // cells from a drop-off footprint edge (treasure deposits); dropOff buildings other than the TC are +25 % gather auras
   "resourceNodes": [
     { "id": "res.tree",    "amount": 300,  "footprint": [1,1], "depletes": true,  "regrowSeconds": 0 },
     { "id": "res.berries", "amount": 1000, "footprint": [2,2], "depletes": true },
