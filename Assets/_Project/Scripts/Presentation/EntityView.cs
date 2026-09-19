@@ -26,6 +26,7 @@ namespace RTS.Presentation
         private float _fullHeight = 1f;
         private float _barHeight = 1.2f;
         private float _hpFraction = 1f;
+        private Quaternion _barRotation = Quaternion.identity;
         private bool _selected;
         private static readonly int ColorId = Shader.PropertyToID("_BaseColor");
         private static readonly int LegacyColorId = Shader.PropertyToID("_Color");
@@ -94,7 +95,7 @@ namespace RTS.Presentation
         {
             transform.position = Vector3.LerpUnclamped(_prev, _cur, alpha);
             transform.rotation = Quaternion.Slerp(_prevRot, _curRot, alpha);
-            if (_healthRoot != null) _healthRoot.rotation = Quaternion.identity;   // bars never rotate with the model
+            if (_healthRoot != null) _healthRoot.rotation = _barRotation;   // bars keep facing the camera, not the model
         }
 
         public void SetSelected(bool selected)
@@ -149,7 +150,8 @@ namespace RTS.Presentation
 
             // Face the camera once (the boom yaw/pitch is fixed); cheap billboard.
             Camera cam = Camera.main;
-            if (cam != null) root.transform.rotation = cam.transform.rotation;
+            if (cam != null) _barRotation = cam.transform.rotation;
+            root.transform.rotation = _barRotation;
             _healthRoot = root.transform;
             _healthFill = fill.transform;
             root.SetActive(false);
