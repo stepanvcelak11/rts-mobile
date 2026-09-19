@@ -7,6 +7,7 @@ const S = 64;
 const $ = (id) => document.getElementById(id);
 const canvas = $("game");
 const R = new Renderer(canvas);
+window.__R = R;   // for automated tests
 
 let api = null;
 let running = false, paused = false, speed = 1;
@@ -173,7 +174,8 @@ function endPointer(ev) {
   clearTimeout(gesture.timer);
   if (gesture.mode === "touch") {
     const [wx, wy] = R.toWorld(ev.clientX, ev.clientY);
-    const code = api.Tap(wx, wy, 26 / R.cam.zoom);
+    const hit = R.hitTest(ev.clientX, ev.clientY);
+    const code = api.Tap(wx, wy, 26 / R.cam.zoom, hit);
     feedback(code, wx, wy);
   } else if (gesture.mode === "box") {
     const x0 = Math.min(gesture.sx, ev.clientX), x1 = Math.max(gesture.sx, ev.clientX), y0 = Math.min(gesture.sy, ev.clientY), y1 = Math.max(gesture.sy, ev.clientY);

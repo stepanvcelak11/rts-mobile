@@ -112,7 +112,7 @@ public sealed class WebController
     // ---- gestures (map coordinates) -----------------------------------------------------------
 
     /// <summary>Returns what happened: 0 nothing, 1 move, 2 attack, 3 gather, 4 select, 5 build placed, 6 repair, 7 attack-move, 8 deselect, 9 rally.</summary>
-    public int Tap(FixVec2 p, Fix64 pickRadius)
+    public int Tap(FixVec2 p, Fix64 pickRadius, int hitEntity = 0)
     {
         if (_mode == TapMode.Build) return TryPlaceBuilding(p) ? 5 : 0;
         if (_mode == TapMode.AttackMove)
@@ -130,7 +130,9 @@ public sealed class WebController
             return 9;
         }
 
-        int picked = W.PickAt(p, pickRadius);
+        // The renderer resolves what sprite was under the finger (sprites stand above their cell);
+        // fall back to a ground pick when it found nothing.
+        int picked = hitEntity != 0 && W.IsAlive(hitEntity) ? hitEntity : W.PickAt(p, pickRadius);
         if (picked != 0 && W.Identities.TryGet(picked, out Identity id))
         {
             if (id.Player == Me)

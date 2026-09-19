@@ -330,7 +330,8 @@ public static partial class GameApi
 
     /// <summary>Tap at a map point. Returns what happened: 0 nothing, 1 move, 2 attack, 3 gather, 4 select, 5 build placed, 6 repair, 7 attack-move, 8 deselect.</summary>
     [JSExport]
-    public static int Tap(double x, double y, double pickRadius) => _s == null ? 0 : _s.Controller.Tap(V(x, y), Fix64.FromDecimal((decimal)Math.Clamp(pickRadius, 0.2, 3)));
+    public static int Tap(double x, double y, double pickRadius, int hitEntity) =>
+        _s == null ? 0 : _s.Controller.Tap(V(x, y), Fix64.FromDecimal((decimal)Math.Clamp(pickRadius, 0.2, 3)), hitEntity);
 
     [JSExport]
     public static bool LongPress(double x, double y) => _s != null && _s.Controller.LongPress(V(x, y));

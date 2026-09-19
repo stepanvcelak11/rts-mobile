@@ -218,7 +218,13 @@ export class Renderer {
     const ctx = this.ctx, hw = this.hw, hh = this.hh;
     // depth: far (large x+y) first
     ents.sort((a, b) => depthKey(b) - depthKey(a));
+    this.hitRects = [];
+    const margin = hw * 4;
     for (const e of ents) {
+      if (e.kind !== 4) {   // cull off-screen sprites (big maps)
+        const [cx, cy] = this.toScreen(e.kind === 1 ? e.x : e.x + e.a / 2, e.kind === 1 ? e.y : e.y + e.b / 2);
+        if (cx < -margin || cx > innerWidth + margin || cy < -margin || cy > innerHeight + margin * 1.5) continue;
+      }
       if (e.kind === 2) this.drawBuilding(e);
       else if (e.kind === 3) this.drawNode(e);
       else if (e.kind === 1) this.drawUnit(e);
@@ -244,6 +250,7 @@ export class Renderer {
     const dw = sprite.width * scale, dh = sprite.height * scale;
     const left = sx - (e.b * BASE) * scale;          // sprite origin: west corner is at (x, y+h)
     const top = sy - lift - dh + (0);
+    this.hitRects.push({ id: e.id, x0: left, y0: top + dh * 0.15, x1: left + dw, y1: top + dh, kind: 2, depth: depthKey(e) });
     if (site) {
       const k = Math.max(0.08, e.state / 100);
       ctx.save();
@@ -321,7 +328,9 @@ export class Renderer {
     const [sx, sy] = this.toScreen(e.x + e.a / 2, e.y + e.b / 2);
     const scale = hw / BASE;
     const dw = sprite.width * scale, dh = sprite.height * scale;
-    ctx.drawImage(sprite, sx - dw / 2, sy - lift - dh + (e.a + e.b) * this.hh * 0.5, dw, dh);
+    const top = sy - lift - dh + (e.a + e.b) * this.hh * 0.5;
+    ctx.drawImage(sprite, sx - dw / 2, top, dw, dh);
+    this.hitRects.push({ id: e.id, x0: sx - dw * 0.4, y0: top + dh * 0.1, x1: sx + dw * 0.4, y1: top + dh, kind: 3, depth: depthKey(e) });
   }
 
   drawUnit(e) {
@@ -342,6 +351,7 @@ export class Renderer {
     if (e.flags & 1) { ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(sx, sy, e.a * hw * 2.2, e.a * hh * 2.2, 0, 0, Math.PI * 2); ctx.stroke(); }
     const bob = moving ? Math.abs(Math.sin(this.time * 10 + e.id)) * hh * 0.15 : 0;
     ctx.drawImage(sprite, sx - dw / 2, sy - dh + hh * 0.35 - bob, dw, dh);
+    this.hitRects.push({ id: e.id, x0: sx - Math.max(dw * 0.45, 14), y0: sy - dh + hh * 0.35, x1: sx + Math.max(dw * 0.45, 14), y1: sy + hh * 0.5, kind: 1, depth: depthKey(e) });
     if (e.flags & 512) {   // cargo
       const res = (e.flags >> 14) & 3;
       ctx.fillStyle = ["#8fe07f", "#a3722f", "#f7d66a"][res] || "#ddd";
@@ -501,6 +511,17 @@ export class Renderer {
     mctx.beginPath();
     corners.forEach(([x, y], i) => { const px = x * s, py = (H - y) * s; if (i === 0) mctx.moveTo(px, py); else mctx.lineTo(px, py); });
     mctx.closePath(); mctx.stroke();
+  }
+
+  /// The entity whose sprite is under a screen point (nearest to the viewer wins; units before buildings).
+  hitTest(sx, sy) {
+    if (!this.hitRects) return 0;
+    let best = null;
+    for (const r of this.hitRects) {
+      if (sx < r.x0 || sx > r.x1 || sy < r.y0 || sy > r.y1) continue;
+      if (!best || r.kind === 1 && best.kind !== 1 || (r.kind === best.kind || best.kind !== 1) && r.depth < best.depth) best = r;
+    }
+    return best ? best.id : 0;
   }
 
   /// Entities whose screen position lies inside a screen rect (box selection).

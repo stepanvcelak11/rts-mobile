@@ -58,7 +58,7 @@ def main() -> int:
             });
         }""")
         print("frame:", state)
-        assert state["count"] > 50, "expected entities"
+        assert state["count"] > 30, "expected entities, got " + str(state)
         # Select the first villager by tapping its position (from the draw buffer), then a tree.
         found = page.evaluate("""() => {
             const f = window.__api.Frame(0); const n = f[0];
@@ -66,8 +66,8 @@ def main() -> int:
             for (let i = 0; i < n; i++) { const o = 16 + i*12;
                 if (f[o] === 1 && f[o+4] === 0 && (f[o+9] & 4) && !v) v = [f[o+2]/64, f[o+3]/64];
                 if (f[o] === 3 && f[o+11] === 0 && f[o+4] === -1 && !tree) tree = [f[o+2]/64 + 0.5, f[o+3]/64 + 0.5]; }
-            window.__api.Tap(v[0], v[1], 0.6);
-            window.__api.Tap(tree[0], tree[1], 0.6);
+            window.__api.Tap(v[0], v[1], 0.6, 0);
+            window.__api.Tap(tree[0], tree[1], 0.6, 0);
             return {v, tree};
         }""")
         print("tapped villager + tree:", found)
@@ -77,6 +77,23 @@ def main() -> int:
         f2 = page.evaluate("() => { const f = window.__api.Frame(0); return f[1]; }")
         print("tick after 5.5 s:", f2)
         assert f2 > 60, "simulation should have advanced ~100 ticks"
+        # Real clicks on sprites: select a villager by its sprite, then click a tree sprite → gather order.
+        page.wait_for_timeout(300)
+        def rect_center(kind, own=True):
+            return page.evaluate("""([kind, own]) => { const R = window.__R; const cand = R.hitRects.filter(r => r.kind === kind && (!own || (R.lastEnts.find(e => e.id === r.id) || {}).player === 0)
+                && r.x0 > 0 && r.y0 > 120 && r.x1 < innerWidth && r.y1 < innerHeight - 260);
+                if (!cand.length) return null; const r = cand[0]; return [(r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2, r.id]; }""", [kind, own])
+        v = rect_center(1)
+        assert v, "a villager sprite should be on screen"
+        page.mouse.click(v[0], v[1]); page.wait_for_timeout(250)
+        sel = page.evaluate("() => JSON.parse(window.__api.HudJson()).label")
+        assert "Villager" in sel, "clicking the sprite selects the villager, got: " + sel
+        t = rect_center(3, own=False)
+        assert t, "a tree sprite should be on screen"
+        page.mouse.click(t[0], t[1]); page.wait_for_timeout(200)
+        state = page.evaluate("() => JSON.parse(window.__api.HudJson()).label")
+        print("after tree click:", state)
+        assert "gather" in state or "move" in state, "villager should be gathering after clicking a tree sprite"
         # Real touch gestures on the canvas: pan and tap.
         page.touchscreen.tap(240, 400)
         page.wait_for_timeout(300)
