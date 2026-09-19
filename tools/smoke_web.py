@@ -63,7 +63,7 @@ def main() -> int:
         found = page.evaluate("""() => {
             const f = window.__api.Frame(0); const n = f[0];
             let v = null, tree = null;
-            for (let i = 0; i < n; i++) { const o = 12 + i*12;
+            for (let i = 0; i < n; i++) { const o = 16 + i*12;
                 if (f[o] === 1 && f[o+4] === 0 && (f[o+9] & 4) && !v) v = [f[o+2]/64, f[o+3]/64];
                 if (f[o] === 3 && f[o+11] === 0 && f[o+4] === -1 && !tree) tree = [f[o+2]/64 + 0.5, f[o+3]/64 + 0.5]; }
             window.__api.Tap(v[0], v[1], 0.6);

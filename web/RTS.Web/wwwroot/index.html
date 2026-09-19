@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#141922" />
+  <meta name="theme-color" content="#0b0e14" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <title>Two Rivers — mobile RTS</title>
@@ -15,46 +15,82 @@
 
   <div id="hud" class="hidden">
     <div id="top">
-      <span class="chip food" id="food">Food 0</span>
-      <span class="chip wood" id="wood">Wood 0</span>
-      <span class="chip gold" id="gold">Gold 0</span>
-      <span class="chip pop" id="pop">0/0</span>
-      <span class="chip age" id="age">Age I</span>
-      <button class="btn small" id="shipBtn">Shipments</button>
+      <span class="res food" title="Food"><i></i><b id="food">0</b></span>
+      <span class="res wood" title="Wood"><i></i><b id="wood">0</b></span>
+      <span class="res gold" title="Gold"><i></i><b id="gold">0</b></span>
+      <span class="res pop" title="Population"><i></i><b id="pop">0/0</b></span>
+      <span class="chip age" id="age">I · Discovery</span>
+      <span class="chip clock" id="clock">0:00</span>
+      <span class="spacer"></span>
+      <button class="btn small" id="shipBtn">XP 0/300</button>
+      <button class="btn small icon" id="pauseBtn" title="Pause (space)">⏸</button>
+      <button class="btn small icon" id="menuBtn" title="Menu">≡</button>
     </div>
-    <canvas id="minimap" width="128" height="128"></canvas>
+    <canvas id="minimap" width="144" height="144"></canvas>
+    <div id="objectives"><button class="btn small neutral" id="objToggle">Objectives</button><ul id="objList" class="hidden"></ul></div>
     <div id="toast" class="hidden"></div>
-    <button id="attackPing" class="btn danger hidden">Under attack! — Go</button>
+    <button id="attackPing" class="btn danger hidden">⚠ Under attack — go</button>
     <button id="idleBtn" class="btn green">Idle</button>
     <div id="sheet">
-      <div id="label">…</div>
+      <div id="label"></div>
       <div id="cards"></div>
       <div id="actions"></div>
     </div>
     <div id="drawer" class="hidden"></div>
     <div id="radial" class="hidden"></div>
     <div id="box" class="hidden"></div>
-    <div id="end" class="hidden">
-      <h1 id="endTitle">Victory</h1>
-      <p id="endStats"></p>
-      <button class="btn" id="againBtn">Play again</button>
+    <div id="tip" class="hidden"></div>
+    <div id="pauseMenu" class="overlay hidden">
+      <div class="panel">
+        <h2>Paused</h2>
+        <button class="btn big" id="resumeBtn">Resume</button>
+        <div class="row2"><button class="btn neutral" id="speedBtn">1×</button><button class="btn neutral" id="muteBtn">🔊 Sound</button></div>
+        <button class="btn big neutral" id="quitBtn">Quit to menu</button>
+      </div>
+    </div>
+    <div id="end" class="overlay hidden">
+      <div class="panel">
+        <h1 id="endTitle">Victory</h1>
+        <p id="endStats"></p>
+        <button class="btn big" id="againBtn">Play again</button>
+      </div>
     </div>
   </div>
 
   <div id="menu">
     <div class="card">
       <h1>Two Rivers</h1>
-      <p class="sub">A mobile real-time strategy skirmish. Gather, build, age up, and raze the enemy town center.</p>
+      <p class="sub">Real-time strategy for one thumb. Gather, build, age up, trade, ship reinforcements from your Home City — and raze the enemy town center.</p>
       <h2>Your civilization</h2>
       <div id="civs"></div>
-      <h2>Opponent</h2>
-      <div class="row">
-        <label><input type="radio" name="diff" value="1" /> Easy</label>
-        <label><input type="radio" name="diff" value="2" checked /> Normal</label>
-        <label><input type="radio" name="diff" value="3" /> Hard</label>
+      <div class="cols">
+        <div>
+          <h2>Map</h2>
+          <select id="mapType"></select>
+          <div class="row">
+            <label><input type="radio" name="size" value="64" /> Small</label>
+            <label><input type="radio" name="size" value="80" checked /> Medium</label>
+            <label><input type="radio" name="size" value="104" /> Large</label>
+          </div>
+        </div>
+        <div>
+          <h2>Opponent</h2>
+          <div class="row col">
+            <label><input type="radio" name="diff" value="1" /> Easy</label>
+            <label><input type="radio" name="diff" value="2" checked /> Normal</label>
+            <label><input type="radio" name="diff" value="3" /> Hard</label>
+          </div>
+        </div>
       </div>
       <button class="btn big" id="playBtn" disabled>Loading engine…</button>
-      <p class="hint">Tap to select · tap again for the same type · hold and drag to box-select · hold still for orders · drag to pan · pinch or wheel to zoom</p>
+      <button class="btn big neutral" id="helpBtn">How to play</button>
+      <div id="help" class="hidden">
+        <p><b>Tap</b> a unit to select it · tap the same unit again to grab all of its type nearby · <b>hold and drag</b> to box-select · <b>hold still</b> on the ground for the order wheel (Move / Attack) · <b>drag</b> to pan · <b>pinch</b> or wheel to zoom.</p>
+        <p>With villagers selected, tap berries, trees, deer or a mine to gather; tap a mill to farm. Use the bottom bar to build. Select the Town Center to train villagers, research and <b>Age up</b>.</p>
+        <p>Soldiers: tap an enemy to attack, <b>Attack-move</b> to sweep an area, set a stance. Buildings can have a rally point. Home City shipments cost XP earned by gathering and fighting. The market trades resources for gold.</p>
+        <p>Keyboard: arrows/WASD pan · space pauses · H home · . next idle villager · Esc cancels.</p>
+        <button class="btn small" id="helpClose">Close</button>
+      </div>
     </div>
   </div>
 

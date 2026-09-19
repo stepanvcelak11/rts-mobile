@@ -5,7 +5,7 @@ using RTS.Sim.Model;
 
 namespace RTS.Web;
 
-public enum TapMode : byte { Normal, AttackMove, Build }
+public enum TapMode : byte { Normal, AttackMove, Build, Rally }
 
 /// <summary>
 /// Browser twin of the Unity PlayerController: turns taps, long presses and box drags (already
@@ -111,15 +111,23 @@ public sealed class WebController
 
     // ---- gestures (map coordinates) -----------------------------------------------------------
 
-    public void Tap(FixVec2 p, Fix64 pickRadius)
+    /// <summary>Returns what happened: 0 nothing, 1 move, 2 attack, 3 gather, 4 select, 5 build placed, 6 repair, 7 attack-move, 8 deselect, 9 rally.</summary>
+    public int Tap(FixVec2 p, Fix64 pickRadius)
     {
-        if (_mode == TapMode.Build) { TryPlaceBuilding(p); return; }
+        if (_mode == TapMode.Build) return TryPlaceBuilding(p) ? 5 : 0;
         if (_mode == TapMode.AttackMove)
         {
             int[] soldiers = SelectedSoldiers();
             if (soldiers.Length > 0) Submit(new AttackMoveCommand(Me, soldiers, p));
             SetMode(TapMode.Normal);
-            return;
+            return 7;
+        }
+        if (_mode == TapMode.Rally)
+        {
+            int b = SelectedBuilding();
+            if (b != 0) Submit(new RallyCommand(Me, b, p));
+            SetMode(TapMode.Normal);
+            return 9;
         }
 
         int picked = W.PickAt(p, pickRadius);
@@ -128,28 +136,60 @@ public sealed class WebController
             if (id.Player == Me)
             {
                 if (id.Kind == EntityKind.Building && W.Constructions.Has(picked) && SelectedBuilders().Length > 0)
-                { Submit(new RepairCommand(Me, SelectedBuilders(), picked)); return; }
+                { Submit(new RepairCommand(Me, SelectedBuilders(), picked)); return 6; }
+                // A gathering point (mill) with gatherers selected is a gather order, not a selection.
+                if (id.Kind == EntityKind.Building && W.Nodes.Has(picked) && SelectedGatherers().Length > 0)
+                { Submit(new GatherCommand(Me, SelectedGatherers(), picked)); return 3; }
                 if (id.Kind == EntityKind.Unit && _selection.Count == 1 && _selection[0] == picked) Select(SameTypeNearby(picked));
                 else Select(new[] { picked });
-                return;
+                return 4;
             }
             if (id.Kind == EntityKind.ResourceNode)
             {
                 int[] gatherers = SelectedGatherers();
-                if (gatherers.Length > 0) { Submit(new GatherCommand(Me, gatherers, picked)); return; }
+                if (gatherers.Length > 0) { Submit(new GatherCommand(Me, gatherers, picked)); return 3; }
                 _selection.Clear();
-                return;
+                return 8;
             }
             if (World.AreEnemies(Me, id.Player) && id.Kind != EntityKind.Projectile)
             {
                 int[] soldiers = SelectedSoldiers();
-                if (soldiers.Length > 0) { Submit(new AttackCommand(Me, soldiers, picked)); return; }
+                if (soldiers.Length > 0) { Submit(new AttackCommand(Me, soldiers, picked)); return 2; }
             }
         }
 
         int[] units = SelectedUnits();
-        if (units.Length > 0) Submit(new MoveCommand(Me, units, p));
-        else _selection.Clear();
+        if (units.Length > 0) { Submit(new MoveCommand(Me, units, p)); return 1; }
+        bool had = _selection.Count > 0;
+        _selection.Clear();
+        return had ? 8 : 0;
+    }
+
+    /// <summary>Box selection resolved in screen space by the renderer: keeps own units, prefers soldiers.</summary>
+    public void SelectFromScreen(int[] ids)
+    {
+        var hits = new List<int>();
+        var soldiers = new List<int>();
+        foreach (int e in ids)
+        {
+            if (!W.Identities.TryGet(e, out Identity id) || id.Player != Me || id.Kind != EntityKind.Unit) continue;
+            hits.Add(e);
+            if (!W.Cargos.Has(e)) soldiers.Add(e);
+        }
+        if (hits.Count > 0) Select(soldiers.Count > 0 ? soldiers : hits);
+    }
+
+    public void SelectAll(bool soldiers)
+    {
+        var list = new List<int>();
+        for (int i = 0; i < W.Behaviours.Count; i++)
+        {
+            int e = W.Behaviours.EntityAt(i);
+            if (W.Identities.Get(e).Player != Me) continue;
+            bool isVillager = W.Cargos.Has(e);
+            if (soldiers ? (!isVillager && W.UnitDefOf(e).CanAttack) : isVillager) list.Add(e);
+        }
+        Select(list);
     }
 
     /// <summary>Long press: remembers the point for the radial menu. Returns true when a menu makes sense.</summary>
@@ -222,7 +262,7 @@ public sealed class WebController
         _ghostValid = BuildCommand.Validate(W, Me, _buildIndex, _ghostX, _ghostY) == PlacementResult.Ok;
     }
 
-    private void TryPlaceBuilding(FixVec2 p)
+    private bool TryPlaceBuilding(FixVec2 p)
     {
         BakedBuilding b = W.DefsOf(Me).Buildings[_buildIndex];
         Origin(p, b.W, b.H, out int x, out int y);
@@ -232,10 +272,11 @@ public sealed class WebController
             LastRejection = r == PlacementResult.NotAffordable ? "Not enough resources"
                           : r == PlacementResult.LimitReached ? "Limit reached"
                           : r == PlacementResult.WrongAge ? "Advance to the next Age first" : "Can't build there";
-            return;
+            return false;
         }
         Submit(new BuildCommand(Me, _buildIndex, x, y, SelectedBuilders()));
         SetMode(TapMode.Normal);
+        return true;
     }
 
     public void Submit(ICommand command) => _session.Source.Submit(command);

@@ -29,7 +29,10 @@ plain .NET assembly with **no UnityEngine reference** — it also compiles as
       projectiles, turrets), unit FSM with attack/attack-move/flee, skirmish AI (3 levels)
 - [x] Phase 4 — 3 civilizations with unique units and passives, ages, techs, Home-City
       shipments, full mobile HUD (minimap, cards, queues, radial menu, box select)
-- 37 NUnit tests green, including AI-vs-AI determinism and replay playback
+- [x] Phase 5 (web) — isometric renderer with procedural sprites, fog of war, generated maps
+      (4 types × 3 sizes), farms, market, stances, formations, rally points, 3 new unit lines,
+      objectives, tooltips, sound, pause/speed
+- 44 NUnit tests green, including AI-vs-AI determinism and replay playback
 
 ## Getting started
 
@@ -47,8 +50,8 @@ python tools/check_deps.py                      # Sim/Data/Net stay engine-free
 dotnet publish web/RTS.Web/RTS.Web.csproj -c Release -o web-dist
 python tools/smoke_web.py            # headless Playwright: boots, plays, checks for JS errors
 ```
-`web/RTS.Web` hosts the simulation in Blazor WebAssembly; `wwwroot/game.js` is the canvas
-renderer + gesture layer + HTML HUD. Pushes to `main` run the tests and deploy to GitHub Pages
+`web/RTS.Web` hosts the simulation in Blazor WebAssembly; `wwwroot/game.js` (input + HUD),
+`render.js` (isometric renderer, procedural sprites, fog) and `sfx.js` (WebAudio) are the client. Pushes to `main` run the tests and deploy to GitHub Pages
 (`.github/workflows/deploy.yml`).
 
 ### Unity

@@ -40,7 +40,16 @@ Verified: 10-minute Hard-vs-Hard match is deterministic (same hash twice), 468 h
    match-end panel.
 3. Safe-area padding done; haptics and tutorial hints not yet.
 
-## Next (Phase 5 candidates)
+## Phase 5 — Playable web release ✅ (19. 9.)
+- `web/`: the simulation in Blazor WebAssembly, isometric canvas renderer with procedurally
+  generated sprites (units per type/civ colour/facing, buildings per type, trees/berries/mines/deer),
+  baked ground texture warped onto the iso diamond, soft fog of war, cliffs, order markers,
+  effects, minimap, HTML HUD with icons, tooltips, objectives, radial menu, box select,
+  pause/speed, procedural sound. Deployed by GitHub Actions to GitHub Pages.
+- Sim: `MapGenerator` (Two Rivers, Great Plains, Highlands, Lakeland; 64/80/104), formations,
+  stances, rally points, mill farm plots, market, skirmisher / dragoon / mortar, guard techs.
+
+## Next (Phase 6 candidates)
 - Formations and group speed matching; hierarchical pathfinding for 128×128+ maps.
 - Lockstep `LockstepCommandSource` over a relay; desync reports from hash checkpoints.
 - Campaign scenario loader (map + scripted triggers), farms/market, garrison.
