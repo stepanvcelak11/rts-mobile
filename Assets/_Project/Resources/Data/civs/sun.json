@@ -66,7 +66,8 @@
     "preferredComp": [
       "unit.pikeman",
       "unit.crossbowman",
-      "unit.hussar"
+      "unit.hussar",
+      "unit.skirmisher"
     ]
   }
 }

@@ -25,6 +25,7 @@ namespace RTS.Sim.Model
         public int ShipmentsSent;
         public readonly bool[] Researched;   // per tech index (techs and once-per-game shipments)
         public int ShipmentsAvailable;       // computed every tick from Xp
+        public readonly Fix64[] MarketPrice; // gold per 100 of each resource (buy price; sell = 70 %)
 
         public AiDifficulty Ai = AiDifficulty.None;
         public bool IsAi => Ai != AiDifficulty.None;
@@ -44,6 +45,8 @@ namespace RTS.Sim.Model
             CivIndex = civIndex;
             Stockpile = new Fix64[resourceCount];
             Researched = new bool[techCount];
+            MarketPrice = new Fix64[resourceCount];
+            for (int i = 0; i < resourceCount; i++) MarketPrice[i] = Fix64.FromInt(100);
         }
 
         public bool CanAfford(Fix64[] cost)
@@ -77,6 +80,7 @@ namespace RTS.Sim.Model
             h.Add(Population); h.Add(PopulationCap); h.Add(Alive);
             h.Add(Age); h.Add(AgeUpBuilding); h.Add(AgeUpRemaining);
             h.Add(Xp); h.Add(ShipmentsSent); h.Add(ShipmentsAvailable);
+            for (int i = 0; i < MarketPrice.Length; i++) h.Add(MarketPrice[i]);
             for (int i = 0; i < Researched.Length; i++) h.Add(Researched[i]);
             h.Add((byte)Ai);
             h.Add(UnitsKilled); h.Add(UnitsLost); h.Add(BuildingsRazed);

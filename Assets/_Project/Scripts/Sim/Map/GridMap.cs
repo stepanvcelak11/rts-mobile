@@ -22,6 +22,11 @@ namespace RTS.Sim.Model
         }
 
         public static bool IsWalkable(TerrainType t) => t != TerrainType.Water && t != TerrainType.Cliff;
+
+        public static string Name(TerrainType t) => t switch
+        {
+            TerrainType.Dirt => "dirt", TerrainType.Sand => "sand", TerrainType.Water => "water", TerrainType.Cliff => "cliff", _ => "grass",
+        };
     }
 
     public struct Cell

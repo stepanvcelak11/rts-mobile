@@ -313,6 +313,204 @@
       }
     },
     {
+      "id": "unit.skirmisher",
+      "name": "Skirmisher",
+      "civ": "common",
+      "age": "age.2",
+      "trainedAt": [
+        "bld.barracks"
+      ],
+      "cost": {
+        "food": 50,
+        "gold": 65
+      },
+      "trainSeconds": 30,
+      "population": 1,
+      "batchSize": 5,
+      "stats": {
+        "hp": 110,
+        "speed": 4.0,
+        "los": 16,
+        "armor": {
+          "melee": 0,
+          "ranged": 0.3,
+          "siege": 0
+        },
+        "sizeClass": "small"
+      },
+      "attacks": [
+        {
+          "id": "ranged",
+          "damage": 18,
+          "type": "ranged",
+          "range": 16,
+          "minRange": 0,
+          "cooldownSeconds": 3.0,
+          "projectile": "proj.bullet",
+          "multipliers": {
+            "tag.infantry": 2.0,
+            "tag.cavalry": 0.7
+          }
+        },
+        {
+          "id": "melee",
+          "damage": 6,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {}
+        }
+      ],
+      "tags": [
+        "tag.infantry",
+        "tag.ranged",
+        "tag.gunpowder"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "defensive",
+        "leashRange": 8,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Skirmisher",
+        "icon": "ui/units/skirmisher",
+        "scale": 1.0,
+        "voiceSet": "vo.skirmisher"
+      }
+    },
+    {
+      "id": "unit.dragoon",
+      "name": "Dragoon",
+      "civ": "common",
+      "age": "age.3",
+      "trainedAt": [
+        "bld.stable"
+      ],
+      "cost": {
+        "food": 100,
+        "gold": 100
+      },
+      "trainSeconds": 40,
+      "population": 2,
+      "batchSize": 3,
+      "stats": {
+        "hp": 250,
+        "speed": 6.5,
+        "los": 14,
+        "armor": {
+          "melee": 0.2,
+          "ranged": 0.2,
+          "siege": 0
+        },
+        "sizeClass": "medium"
+      },
+      "attacks": [
+        {
+          "id": "ranged",
+          "damage": 20,
+          "type": "ranged",
+          "range": 12,
+          "minRange": 0,
+          "cooldownSeconds": 3.0,
+          "projectile": "proj.bullet",
+          "multipliers": {
+            "tag.cavalry": 3.0,
+            "tag.artillery": 2.0
+          }
+        },
+        {
+          "id": "melee",
+          "damage": 10,
+          "type": "melee",
+          "range": 1,
+          "cooldownSeconds": 1.5,
+          "multipliers": {}
+        }
+      ],
+      "tags": [
+        "tag.cavalry",
+        "tag.ranged",
+        "tag.gunpowder"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "aggressive",
+        "leashRange": 12,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Dragoon",
+        "icon": "ui/units/dragoon",
+        "scale": 1.0,
+        "voiceSet": "vo.dragoon"
+      }
+    },
+    {
+      "id": "unit.mortar",
+      "name": "Mortar",
+      "civ": "common",
+      "age": "age.4",
+      "trainedAt": [
+        "bld.foundry"
+      ],
+      "cost": {
+        "wood": 100,
+        "gold": 350
+      },
+      "trainSeconds": 60,
+      "population": 4,
+      "batchSize": 1,
+      "stats": {
+        "hp": 200,
+        "speed": 2.5,
+        "los": 24,
+        "armor": {
+          "melee": 0,
+          "ranged": 0.5,
+          "siege": 0
+        },
+        "sizeClass": "large"
+      },
+      "attacks": [
+        {
+          "id": "cannon",
+          "damage": 200,
+          "type": "siege",
+          "range": 28,
+          "minRange": 6,
+          "cooldownSeconds": 6.0,
+          "projectile": "proj.cannonball",
+          "multipliers": {
+            "tag.infantry": 0.25,
+            "tag.cavalry": 0.25,
+            "tag.building": 4.0
+          }
+        }
+      ],
+      "tags": [
+        "tag.artillery"
+      ],
+      "behaviour": {
+        "canGather": false,
+        "canBuild": false,
+        "aggro": "defensive",
+        "leashRange": 4,
+        "fleeHpPercent": 0
+      },
+      "gather": null,
+      "view": {
+        "prefab": "Units/Mortar",
+        "icon": "ui/units/mortar",
+        "scale": 1.0,
+        "voiceSet": "vo.mortar"
+      }
+    },
+    {
       "id": "unit.falconet",
       "name": "Falconet",
       "civ": "common",

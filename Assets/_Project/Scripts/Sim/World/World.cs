@@ -13,6 +13,9 @@ namespace RTS.Sim.Model
         public uint Seed = 1;
         public int PlayerCount = 2;
         public string MapId = "map.default";
+        /// <summary>When set, the map is generated from Seed instead of loaded by MapId (see MapGenerator.Types).</summary>
+        public string MapType;
+        public int MapSize = 80;
         public string[] CivIds = { "civ.crown", "civ.crown" };
         public AiDifficulty[] Ai = { AiDifficulty.None, AiDifficulty.Normal };
         public bool SpawnStartingUnits = true;
@@ -54,6 +57,7 @@ namespace RTS.Sim.Model
         public readonly ComponentStore<Turret> Turrets = new ComponentStore<Turret>();
         public readonly ComponentStore<Projectile> Projectiles = new ComponentStore<Projectile>();
         public readonly ComponentStore<Research> Researches = new ComponentStore<Research>();
+        public readonly ComponentStore<Rally> Rallies = new ComponentStore<Rally>();
 
         /// <summary>Events raised during the last <see cref="Step"/>. Read-only for presentation.</summary>
         public readonly List<SimEvent> Events = new List<SimEvent>(64);
@@ -69,7 +73,8 @@ namespace RTS.Sim.Model
             Config = config ?? throw new ArgumentNullException(nameof(config));
             Rng = new DetRandom(config.Seed);
 
-            MapDef mapDef = data.Maps.Count > 0 ? data.Maps[data.MapIndex(config.MapId)] : new MapDef();
+            MapDef mapDef = !string.IsNullOrEmpty(config.MapType) ? MapGenerator.Generate(config.MapType, config.Seed, config.MapSize)
+                          : data.Maps.Count > 0 ? data.Maps[data.MapIndex(config.MapId)] : new MapDef();
             Map = GridMap.FromDef(mapDef);
             Units = new UnitGrid(Map.Width, Map.Height);
 
@@ -164,6 +169,7 @@ namespace RTS.Sim.Model
             Turrets.Hash(ref h);
             Projectiles.Hash(ref h);
             Researches.Hash(ref h);
+            Rallies.Hash(ref h);
             h.Add(_nextEntity);
             return h.Value;
         }
@@ -217,6 +223,11 @@ namespace RTS.Sim.Model
         {
             if (b.QueueSlots > 0) Queues.Add(entity, new ProductionQueue());
             if (b.Attack != null) Turrets.Add(entity, new Turret());
+            if (b.GatherNode >= 0 && !Nodes.Has(entity))
+            {
+                BakedNode n = Defs.Nodes[b.GatherNode];
+                Nodes.Add(entity, new ResourceNode { Def = n.Index, Resource = n.Resource, Amount = Fix64.FromInt(-1), RatePerTick = n.RatePerTick, Depletes = false });
+            }
             if (player >= 0 && b.PopulationProvided > 0)
                 Players[player].PopulationCap = Math.Min(Players[player].PopulationCap + b.PopulationProvided, Defs.PopulationCapMax);
         }
@@ -232,6 +243,7 @@ namespace RTS.Sim.Model
             Fields.Invalidate();
             Nodes.Add(e, new ResourceNode
             {
+                Def = n.Index,
                 Resource = n.Resource,
                 Amount = amountOverride < Fix64.Zero ? n.Amount : amountOverride,
                 RatePerTick = n.RatePerTick,
@@ -290,7 +302,7 @@ namespace RTS.Sim.Model
                 }
                 Identities.Remove(e); Positions.Remove(e); Footprints.Remove(e); Healths.Remove(e);
                 Movers.Remove(e); Behaviours.Remove(e); Cargos.Remove(e); Nodes.Remove(e);
-                Constructions.Remove(e); Queues.Remove(e); Turrets.Remove(e); Projectiles.Remove(e); Researches.Remove(e);
+                Constructions.Remove(e); Queues.Remove(e); Turrets.Remove(e); Projectiles.Remove(e); Researches.Remove(e); Rallies.Remove(e);
                 Events.Add(new SimEvent(SimEventKind.Despawned, e));
             }
             _pendingDespawn.Clear();
@@ -331,6 +343,17 @@ namespace RTS.Sim.Model
                 if (d < bestD || (d == bestD && e < best)) { bestD = d; best = e; }
             }
             return best;
+        }
+
+        /// <summary>True when the player owns a completed market.</summary>
+        public bool HasMarket(int player)
+        {
+            for (int i = 0; i < Identities.Count; i++)
+            {
+                ref Identity id = ref Identities.At(i);
+                if (id.Kind == EntityKind.Building && id.Player == player && DefsOf(player).Buildings[id.DefIndex].IsMarket && !Constructions.Has(Identities.EntityAt(i))) return true;
+            }
+            return false;
         }
 
         /// <summary>First completed building of a def for a player (e.g. the town center), 0 if none.</summary>

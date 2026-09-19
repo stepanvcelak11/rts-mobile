@@ -16,6 +16,7 @@ namespace RTS.Sim.Systems
             StepResearch(w);
             StepAgeUp(w);
             StepShipments(w);
+            StepMarket(w);
         }
 
         private static void StepConstruction(World w)
@@ -69,6 +70,7 @@ namespace RTS.Sim.Systems
                 q.Dequeue(nextTicks);
                 int e = w.SpawnUnit(unit.Index, id.Player, spawnAt);
                 w.Events.Add(new SimEvent(SimEventKind.UnitTrained, e, building));
+                if (w.Rallies.TryGet(building, out Rally rally)) BehaviorSystem.OrderMove(w, e, rally.Point);
             }
         }
 
@@ -119,6 +121,19 @@ namespace RTS.Sim.Systems
                 h.Hp = h.Hp * newMax / h.MaxHp;
                 h.MaxHp = newMax;
             }
+        }
+
+        /// <summary>Market prices drift back toward 100 gold per 100 resources, 1 point every 5 seconds.</summary>
+        private static void StepMarket(World w)
+        {
+            if (w.Tick % 100 != 0) return;
+            Fix64 baseline = Fix64.FromInt(100);
+            foreach (PlayerState ps in w.Players)
+                for (int r = 0; r < ps.MarketPrice.Length; r++)
+                {
+                    if (ps.MarketPrice[r] > baseline) ps.MarketPrice[r] = FixMath.Max(baseline, ps.MarketPrice[r] - Fix64.One);
+                    else if (ps.MarketPrice[r] < baseline) ps.MarketPrice[r] = FixMath.Min(baseline, ps.MarketPrice[r] + Fix64.One);
+                }
         }
 
         private static void StepAgeUp(World w)

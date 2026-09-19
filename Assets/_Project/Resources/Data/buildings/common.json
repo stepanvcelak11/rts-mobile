@@ -1,6 +1,8 @@
 {
   "items": [
     {
+      "gatherNode": null,
+      "market": false,
       "id": "bld.towncenter",
       "name": "Town Center",
       "civ": "common",
@@ -65,6 +67,8 @@
       }
     },
     {
+      "gatherNode": null,
+      "market": false,
       "id": "bld.house",
       "name": "House",
       "civ": "common",
@@ -113,14 +117,16 @@
       }
     },
     {
+      "gatherNode": "res.farm",
+      "market": false,
       "id": "bld.mill",
       "name": "Mill",
       "civ": "common",
       "age": "age.1",
       "cost": {
-        "wood": 400
+        "wood": 250
       },
-      "buildSeconds": 40,
+      "buildSeconds": 35,
       "footprint": [
         3,
         3
@@ -143,7 +149,9 @@
         "requiresNear": null
       },
       "trains": [],
-      "researches": [],
+      "researches": [
+        "tech.seed_drill"
+      ],
       "dropOff": [
         "food"
       ],
@@ -162,6 +170,60 @@
       }
     },
     {
+      "gatherNode": null,
+      "market": true,
+      "id": "bld.market",
+      "name": "Market",
+      "civ": "common",
+      "age": "age.2",
+      "cost": {
+        "wood": 200
+      },
+      "buildSeconds": 40,
+      "footprint": [
+        3,
+        3
+      ],
+      "stats": {
+        "hp": 1200,
+        "armor": {
+          "siege": -0.2,
+          "ranged": 0.6,
+          "melee": 0.6
+        },
+        "los": 8
+      },
+      "placement": {
+        "terrain": [
+          "grass",
+          "dirt"
+        ],
+        "minDistanceToEnemyBuilding": 0,
+        "requiresNear": null
+      },
+      "trains": [],
+      "researches": [
+        "tech.gang_saw",
+        "tech.placer_mines"
+      ],
+      "dropOff": [],
+      "populationProvided": 0,
+      "attack": null,
+      "garrison": 0,
+      "limit": 1,
+      "queue": {
+        "slots": 0,
+        "parallel": 0
+      },
+      "view": {
+        "prefab": "Buildings/Market",
+        "icon": "ui/bld/market",
+        "constructionPrefab": "Buildings/_Scaffold3x3"
+      }
+    },
+    {
+      "gatherNode": null,
+      "market": false,
       "id": "bld.tower",
       "name": "Outpost",
       "civ": "common",
@@ -216,6 +278,8 @@
       }
     },
     {
+      "gatherNode": null,
+      "market": false,
       "id": "bld.barracks",
       "name": "Barracks",
       "civ": "common",
@@ -248,10 +312,12 @@
       "trains": [
         "unit.musketeer",
         "unit.crossbowman",
-        "unit.pikeman"
+        "unit.pikeman",
+        "unit.skirmisher"
       ],
       "researches": [
-        "tech.veteran_infantry"
+        "tech.veteran_infantry",
+        "tech.guard_infantry"
       ],
       "dropOff": [],
       "populationProvided": 0,
@@ -269,6 +335,8 @@
       }
     },
     {
+      "gatherNode": null,
+      "market": false,
       "id": "bld.stable",
       "name": "Stable",
       "civ": "common",
@@ -299,10 +367,12 @@
         "requiresNear": null
       },
       "trains": [
-        "unit.hussar"
+        "unit.hussar",
+        "unit.dragoon"
       ],
       "researches": [
-        "tech.veteran_cavalry"
+        "tech.veteran_cavalry",
+        "tech.guard_cavalry"
       ],
       "dropOff": [],
       "populationProvided": 0,
@@ -320,6 +390,8 @@
       }
     },
     {
+      "gatherNode": null,
+      "market": false,
       "id": "bld.foundry",
       "name": "Artillery Foundry",
       "civ": "common",
@@ -350,9 +422,12 @@
         "requiresNear": null
       },
       "trains": [
-        "unit.falconet"
+        "unit.falconet",
+        "unit.mortar"
       ],
-      "researches": [],
+      "researches": [
+        "tech.heavy_shot"
+      ],
       "dropOff": [],
       "populationProvided": 0,
       "attack": null,

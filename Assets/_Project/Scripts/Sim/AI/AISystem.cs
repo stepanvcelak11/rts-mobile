@@ -80,6 +80,15 @@ namespace RTS.Sim.Systems
             // 1. Put idle villagers to work following a target split that shifts with the age.
             AssignVillagers(w, ps, home, villagers);
 
+            // 1b. Farms once the wild food near home is gone (or the economy is big).
+            if (data.TryBuildingIndex("bld.mill", out int millIndex))
+            {
+                int mills = w.CountBuildings(p, millIndex, true);
+                bool foodNearby = w.FindNearestNode(home, data.ResourceIndex("food"), Fix64.FromInt(28)) != 0;
+                if ((!foodNearby && mills < 3) || (villagers >= 18 && mills < 1) || (villagers >= 24 && mills < 2))
+                    TryBuild(w, ps, millIndex, home, 3, 9);
+            }
+
             // 2. Housing.
             if (ps.PopulationCap - ps.Population <= 3 && ps.PopulationCap < w.Defs.PopulationCapMax
                 && data.TryBuildingIndex("bld.house", out int house) && w.CountBuildings(p, house, true) - w.CountBuildings(p, house, false) == 0)
@@ -114,8 +123,9 @@ namespace RTS.Sim.Systems
                 else if (data.TryBuildingIndex("bld.stable", out int stable) && villagers >= 14 && w.CountBuildings(p, stable, true) == 0
                          && w.CountBuildings(p, barracks, false) > 0)
                     TryBuild(w, ps, stable, home, 6, 14);
-                else if (data.TryBuildingIndex("bld.mill", out int mill) && villagers >= 16 && w.CountBuildings(p, mill, true) == 0)
-                    TryBuild(w, ps, mill, home, 4, 10);
+                else if (data.TryBuildingIndex("bld.market", out int market) && villagers >= 14 && w.CountBuildings(p, market, true) == 0
+                         && w.CountBuildings(p, barracks, false) > 0)
+                    TryBuild(w, ps, market, home, 4, 10);
                 else if (ps.Stockpile[data.ResourceIndex("wood")] >= Fix64.FromInt(500) && w.CountBuildings(p, barracks, true) < (prof.WaveSize >= 14 ? 3 : 2))
                     TryBuild(w, ps, barracks, home, 6, 16);   // spare wood → more production
                 else if (data.TryBuildingIndex("bld.tower", out int tower) && ps.Stockpile[data.ResourceIndex("wood")] >= Fix64.FromInt(700) && w.CountBuildings(p, tower, true) < 2)

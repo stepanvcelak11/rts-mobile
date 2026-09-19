@@ -94,12 +94,23 @@ namespace RTS.Sim.Model
         public FixVec2 LeashOrigin;  // where the unit stood when it started chasing
         public FixVec2 ResumePos;    // attack-move destination to resume after a fight
         public UnitState ResumeState;
+        public Stance Stance;        // player override of the definition aggro
 
         public void Hash(ref Hasher h)
         {
             h.Add((byte)State); h.Add(TargetEntity); h.Add(TargetPos); h.Add(LastNode); h.Add(Timer);
-            h.Add(Cooldown); h.Add(LastAttacker); h.Add(LeashOrigin); h.Add(ResumePos); h.Add((byte)ResumeState);
+            h.Add(Cooldown); h.Add(LastAttacker); h.Add(LeashOrigin); h.Add(ResumePos); h.Add((byte)ResumeState); h.Add((byte)Stance);
         }
+    }
+
+    public enum Stance : byte { Default = 0, Passive = 1, Defensive = 2, Aggressive = 3, StandGround = 4 }
+
+    /// <summary>Where units trained at a building walk after spawning.</summary>
+    public struct Rally : IHashable
+    {
+        public FixVec2 Point;
+
+        public void Hash(ref Hasher h) { h.Add(Point); }
     }
 
     /// <summary>A building that shoots (town center, tower).</summary>
@@ -156,6 +167,7 @@ namespace RTS.Sim.Model
     /// <summary>A gatherable node (tree, mine, berries…).</summary>
     public struct ResourceNode : IHashable
     {
+        public int Def;              // node def index (rates, gather multipliers)
         public int Resource;         // resource index
         public Fix64 Amount;         // remaining; negative = infinite
         public Fix64 RatePerTick;    // units gathered per tick by one villager
@@ -163,7 +175,7 @@ namespace RTS.Sim.Model
 
         public bool IsDepleted => Depletes && Amount <= Fix64.Zero;
 
-        public void Hash(ref Hasher h) { h.Add(Resource); h.Add(Amount); h.Add(RatePerTick); h.Add(Depletes); }
+        public void Hash(ref Hasher h) { h.Add(Def); h.Add(Resource); h.Add(Amount); h.Add(RatePerTick); h.Add(Depletes); }
     }
 
     /// <summary>A building that is still being built.</summary>

@@ -102,6 +102,8 @@ namespace RTS.Sim.Model
         public BakedAttack Attack;      // null when the building cannot shoot
         public int[] Tags = Array.Empty<int>();
         public int Garrison;
+        public int GatherNode = -1;     // node def index the completed building doubles as (mill)
+        public bool IsMarket;
 
         public BakedBuilding Clone()
         {
@@ -297,6 +299,8 @@ namespace RTS.Sim.Model
                     Attack = b.attack != null && b.attack.damage > 0 ? BakeAttack(b.attack) : null,
                     Tags = new[] { TagBuilding },
                     Garrison = b.garrison,
+                    GatherNode = !string.IsNullOrEmpty(b.gatherNode) && data.TryNodeIndex(b.gatherNode, out int gn) ? gn : -1,
+                    IsMarket = b.market,
                 };
             }
 

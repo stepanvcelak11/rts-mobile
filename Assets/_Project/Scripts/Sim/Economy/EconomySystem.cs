@@ -42,8 +42,7 @@ namespace RTS.Sim.Systems
 
             Identity id = w.Identities.Get(e);
             BakedDefs defs = w.DefsOf(id.Player);
-            Fix64 rate = node.RatePerTick * defs.Units[id.DefIndex].GatherRateMultiplier
-                         * defs.GatherMultiplier[w.Identities.Get(b.TargetEntity).DefIndex];
+            Fix64 rate = node.RatePerTick * defs.Units[id.DefIndex].GatherRateMultiplier * defs.GatherMultiplier[node.Def];
             Fix64 room = cargo.Capacity - cargo.Amount;
             Fix64 take = FixMath.Min(rate, room);
             if (node.Depletes) take = FixMath.Min(take, node.Amount);

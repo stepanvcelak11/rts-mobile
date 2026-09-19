@@ -126,6 +126,10 @@ namespace RTS.Data
         public int limit;
         public QueueDef queue = new QueueDef();
         public ViewDef view = new ViewDef();
+        /// <summary>Resource node id this building doubles as once complete (mill = farm plots).</summary>
+        public string gatherNode;
+        /// <summary>True for the market: enables buy/sell trades for its owner.</summary>
+        public bool market;
 
         public int FootprintW => footprint.Count > 0 ? footprint[0] : 1;
         public int FootprintH => footprint.Count > 1 ? footprint[1] : 1;

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using RTS.Data;
 using RTS.Sim.Core;
@@ -20,6 +21,52 @@ namespace RTS.Sim.Commands
         public const byte Shipment = 10;
         public const byte Cancel = 11;
         public const byte Repair = 12;
+        public const byte Stance = 13;
+        public const byte Rally = 14;
+        public const byte Trade = 15;
+    }
+
+    /// <summary>Spreads a group order over a compact grid so units do not all fight for one point.</summary>
+    public static class Formation
+    {
+        public static FixVec2[] Targets(World w, int[] units, FixVec2 center)
+        {
+            var result = new FixVec2[units.Length];
+            int n = 0;
+            foreach (int u in units) if (w.Positions.Has(u)) n++;
+            if (n <= 1) { for (int i = 0; i < result.Length; i++) result[i] = center; return result; }
+
+            int cols = 1;
+            while (cols * cols < n) cols++;   // integer ceil(sqrt(n)), no floating point in the sim
+            int rows = (n + cols - 1) / cols;
+            Fix64 spacing = Fix64.FromDecimal(1.1m);
+            // Order units by their position along the approach so the front line stays the front line.
+            var order = new List<int>(units);
+            order.Sort((a, b) =>
+            {
+                Fix64 da = w.Positions.Has(a) ? FixVec2.DistanceSq(w.Positions.Get(a).Value, center) : Fix64.MaxValue;
+                Fix64 db = w.Positions.Has(b) ? FixVec2.DistanceSq(w.Positions.Get(b).Value, center) : Fix64.MaxValue;
+                return da != db ? da.CompareTo(db) : a.CompareTo(b);
+            });
+            var slot = new Dictionary<int, int>();
+            for (int i = 0; i < order.Count; i++) slot[order[i]] = i;
+
+            for (int i = 0; i < units.Length; i++)
+            {
+                int k = slot[units[i]];
+                int col = k % cols, row = k / cols;
+                Fix64 ox = (Fix64.FromInt(col) - Fix64.FromInt(cols - 1) / 2) * spacing;
+                Fix64 oy = (Fix64.FromInt(row) - Fix64.FromInt(rows - 1) / 2) * spacing;
+                FixVec2 t = w.Map.ClampInside(center + new FixVec2(ox, oy));
+                if (!w.Map.IsPassable(t))
+                {
+                    int cx = t.CellX, cy = t.CellY;
+                    t = FlowFieldCache.FindNearestPassable(w.Map, ref cx, ref cy, 2) ? FixVec2.CellCenter(cx, cy) : center;
+                }
+                result[i] = t;
+            }
+            return result;
+        }
     }
 
     /// <summary>Move a group of units to a point.</summary>
@@ -34,8 +81,9 @@ namespace RTS.Sim.Commands
 
         public void Execute(World w)
         {
-            foreach (int u in Units)
-                if (CommandUtil.OwnsUnit(w, Player, u)) BehaviorSystem.OrderMove(w, u, Target);
+            FixVec2[] targets = Formation.Targets(w, Units, Target);
+            for (int i = 0; i < Units.Length; i++)
+                if (CommandUtil.OwnsUnit(w, Player, Units[i])) BehaviorSystem.OrderMove(w, Units[i], targets[i]);
         }
 
         public void Write(BinaryWriter w)
@@ -59,11 +107,13 @@ namespace RTS.Sim.Commands
 
         public void Execute(World w)
         {
-            foreach (int u in Units)
+            FixVec2[] targets = Formation.Targets(w, Units, Target);
+            for (int i = 0; i < Units.Length; i++)
             {
+                int u = Units[i];
                 if (!CommandUtil.OwnsUnit(w, Player, u)) continue;
-                if (w.UnitDefOf(u).CanAttack && w.UnitDefOf(u).Aggro != Aggro.Passive) BehaviorSystem.OrderAttackMove(w, u, Target);
-                else BehaviorSystem.OrderMove(w, u, Target);
+                if (w.UnitDefOf(u).CanAttack && w.UnitDefOf(u).Aggro != Aggro.Passive) BehaviorSystem.OrderAttackMove(w, u, targets[i]);
+                else BehaviorSystem.OrderMove(w, u, targets[i]);
             }
         }
 
@@ -446,6 +496,98 @@ namespace RTS.Sim.Commands
         public static ShipmentCommand Read(BinaryReader r) => new ShipmentCommand(r.ReadInt32(), r.ReadInt32());
     }
 
+    /// <summary>Sets how units react to enemies on their own.</summary>
+    public sealed class StanceCommand : ICommand
+    {
+        public byte TypeId => CommandType.Stance;
+        public int Player { get; }
+        public readonly int[] Units;
+        public readonly Stance Stance;
+
+        public StanceCommand(int player, int[] units, Stance stance) { Player = player; Units = units; Stance = stance; }
+
+        public void Execute(World w)
+        {
+            foreach (int u in Units)
+                if (CommandUtil.OwnsUnit(w, Player, u)) w.Behaviours.Get(u).Stance = Stance;
+        }
+
+        public void Write(BinaryWriter w) { w.Write(Player); CommandUtil.WriteInts(w, Units); w.Write((byte)Stance); }
+        public static StanceCommand Read(BinaryReader r) => new StanceCommand(r.ReadInt32(), CommandUtil.ReadInts(r), (Stance)r.ReadByte());
+    }
+
+    /// <summary>Sets (or clears) the rally point of a production building.</summary>
+    public sealed class RallyCommand : ICommand
+    {
+        public byte TypeId => CommandType.Rally;
+        public int Player { get; }
+        public readonly int Building;
+        public readonly FixVec2 Point;
+        public readonly bool Clear;
+
+        public RallyCommand(int player, int building, FixVec2 point, bool clear = false) { Player = player; Building = building; Point = point; Clear = clear; }
+
+        public void Execute(World w)
+        {
+            if (!CommandUtil.OwnsBuilding(w, Player, Building) || !w.Queues.Has(Building)) { CommandUtil.Reject(w, Player, CommandRejectReason.InvalidTarget); return; }
+            if (Clear) w.Rallies.Remove(Building);
+            else w.Rallies.Set(Building, new Rally { Point = w.Map.ClampInside(Point) });
+        }
+
+        public void Write(BinaryWriter w) { w.Write(Player); w.Write(Building); w.Write(Point.X.Raw); w.Write(Point.Y.Raw); w.Write(Clear); }
+        public static RallyCommand Read(BinaryReader r) => new RallyCommand(r.ReadInt32(), r.ReadInt32(), new FixVec2(Fix64.FromRaw(r.ReadInt64()), Fix64.FromRaw(r.ReadInt64())), r.ReadBoolean());
+    }
+
+    /// <summary>Market trade: buy or sell 100 of a resource for gold at the current price (sell pays 70 %).</summary>
+    public sealed class TradeCommand : ICommand
+    {
+        public const int Lot = 100;
+        public static readonly Fix64 SellFactor = Fix64.Ratio(7, 10);
+        public static readonly Fix64 PriceStep = Fix64.FromInt(3);
+
+        public byte TypeId => CommandType.Trade;
+        public int Player { get; }
+        public readonly int Resource;
+        public readonly bool Buy;
+
+        public TradeCommand(int player, int resource, bool buy) { Player = player; Resource = resource; Buy = buy; }
+
+        public static CommandRejectReason Validate(World w, int player, int resource, bool buy)
+        {
+            if (player < 0 || player >= w.Players.Length) return CommandRejectReason.InvalidTarget;
+            int gold = w.Defs.Data.ResourceIndex("gold");
+            if (resource < 0 || resource >= w.Defs.ResourceCount || resource == gold) return CommandRejectReason.InvalidTarget;
+            if (!w.HasMarket(player)) return CommandRejectReason.InvalidTarget;
+            PlayerState ps = w.Players[player];
+            if (buy && ps.Stockpile[gold] < ps.MarketPrice[resource]) return CommandRejectReason.NotAffordable;
+            if (!buy && ps.Stockpile[resource] < Fix64.FromInt(Lot)) return CommandRejectReason.NotAffordable;
+            return CommandRejectReason.None;
+        }
+
+        public void Execute(World w)
+        {
+            CommandRejectReason why = Validate(w, Player, Resource, Buy);
+            if (why != CommandRejectReason.None) { CommandUtil.Reject(w, Player, why); return; }
+            PlayerState ps = w.Players[Player];
+            int gold = w.Defs.Data.ResourceIndex("gold");
+            if (Buy)
+            {
+                ps.Stockpile[gold] -= ps.MarketPrice[Resource];
+                ps.Stockpile[Resource] = FixMath.Min(ps.Stockpile[Resource] + Fix64.FromInt(Lot), w.Defs.StockpileCap);
+                ps.MarketPrice[Resource] += PriceStep;
+            }
+            else
+            {
+                ps.Stockpile[Resource] -= Fix64.FromInt(Lot);
+                ps.Stockpile[gold] = FixMath.Min(ps.Stockpile[gold] + ps.MarketPrice[Resource] * SellFactor, w.Defs.StockpileCap);
+                ps.MarketPrice[Resource] = FixMath.Max(Fix64.FromInt(30), ps.MarketPrice[Resource] - PriceStep);
+            }
+        }
+
+        public void Write(BinaryWriter w) { w.Write(Player); w.Write(Resource); w.Write(Buy); }
+        public static TradeCommand Read(BinaryReader r) => new TradeCommand(r.ReadInt32(), r.ReadInt32(), r.ReadBoolean());
+    }
+
     /// <summary>Binary (de)serialisation of commands for replays and the network.</summary>
     public static class CommandCodec
     {
@@ -472,6 +614,9 @@ namespace RTS.Sim.Commands
                 case CommandType.Shipment: return ShipmentCommand.Read(r);
                 case CommandType.Cancel: return CancelCommand.Read(r);
                 case CommandType.Repair: return RepairCommand.Read(r);
+                case CommandType.Stance: return StanceCommand.Read(r);
+                case CommandType.Rally: return RallyCommand.Read(r);
+                case CommandType.Trade: return TradeCommand.Read(r);
                 default: throw new InvalidDataException("Unknown command type " + t);
             }
         }

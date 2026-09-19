@@ -107,6 +107,8 @@ def main() -> int:
             ref(b, "trains", t)
         for t in b.get("researches", []):
             ref(b, "researches", t)
+        if b.get("gatherNode"):
+            ref(b, "gatherNode", b["gatherNode"])
         for r in b.get("dropOff", []):
             if r not in resources:
                 err(f"{b['_file']} {b['id']}: dropOff unknown resource '{r}'")

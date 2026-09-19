@@ -181,7 +181,7 @@ namespace RTS.Sim.Systems
                     return;
                 }
                 // Defensive retaliation for idle / working soldiers.
-                if (tu.CanAttack && tu.Aggro != Aggro.Passive && attacker != 0 && w.Identities.Has(attacker)
+                if (tu.CanAttack && BehaviorSystem.EffectiveAggro(tu, tb.Stance) != Aggro.Passive && attacker != 0 && w.Identities.Has(attacker)
                     && (tb.State == UnitState.Idle || tb.State == UnitState.Move) && BehaviorSystem.IsValidTarget(w, target, attacker))
                 {
                     tb.TargetEntity = attacker;

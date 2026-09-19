@@ -5,7 +5,7 @@
   "gatherRates": {
     "res.berries": { "food": 0.67 },
     "res.hunt":    { "food": 0.84 },
-    "res.farm":    { "food": 0.50 },
+    "res.farm":    { "food": 0.45 },
     "res.tree":    { "wood": 0.50 },
     "res.mine":    { "gold": 0.50 }
   },
@@ -16,7 +16,7 @@
     { "id": "res.berries", "amount": 1000, "footprint": [2, 2], "depletes": true },
     { "id": "res.hunt",    "amount": 400,  "footprint": [1, 1], "depletes": true, "mobile": true, "fleeRange": 6 },
     { "id": "res.mine",    "amount": 5000, "footprint": [3, 3], "depletes": true },
-    { "id": "res.farm",    "amount": -1,   "footprint": [3, 3], "depletes": false, "requiresBuilding": "bld.mill" }
+    { "id": "res.farm",    "amount": -1,   "footprint": [3, 3], "depletes": false }
   ],
   "market": { "enabled": true, "basePrice": 100, "priceStep": 3, "decayPerMinute": 4 },
   "populationCapBase": 10,

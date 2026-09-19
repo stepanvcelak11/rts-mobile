@@ -108,14 +108,27 @@ namespace RTS.Sim.Systems
 
         // ---- per-state ticks ----------------------------------------------------------
 
+        /// <summary>Definition aggro unless the player set a stance.</summary>
+        public static Aggro EffectiveAggro(BakedUnit u, Stance stance) => stance switch
+        {
+            Stance.Passive => Aggro.Passive,
+            Stance.Defensive => Aggro.Defensive,
+            Stance.Aggressive => Aggro.Aggressive,
+            Stance.StandGround => Aggro.Defensive,
+            _ => u.Aggro,
+        };
+
         private static void TickIdle(World w, int e, ref UnitBehaviour b, ref Mover m)
         {
             m.Moving = false;
             m.GoalEntity = 0;
             BakedUnit u = w.UnitDefOf(e);
-            if (u.Aggro == Aggro.Passive || !u.CanAttack) return;
+            Aggro aggro = EffectiveAggro(u, b.Stance);
+            if (aggro == Aggro.Passive || !u.CanAttack) return;
             if ((w.Tick + e) % 5 != 0) return;   // scan 4× per second, staggered
-            int target = FindEnemy(w, e, u.Los, includeBuildings: u.Aggro == Aggro.Aggressive);
+            // Stand ground: only shoot what is already in range.
+            Fix64 scan = b.Stance == Stance.StandGround ? u.Attacks[0].Range : u.Los;
+            int target = FindEnemy(w, e, scan, includeBuildings: aggro == Aggro.Aggressive);
             if (target != 0) Engage(w, e, ref b, target, UnitState.Idle);
         }
 
@@ -161,6 +174,8 @@ namespace RTS.Sim.Systems
         {
             BakedUnit u = w.UnitDefOf(e);
             if (!u.CanAttack) { Resume(w, e, ref b, ref m); return; }
+            // A passive stance cancels fights the unit picked on its own (explicit orders still stand).
+            if (b.ResumeState != UnitState.Attack && EffectiveAggro(u, b.Stance) == Aggro.Passive) { Resume(w, e, ref b, ref m); return; }
 
             if (!IsValidTarget(w, e, b.TargetEntity))
             {
@@ -171,11 +186,12 @@ namespace RTS.Sim.Systems
                 else { Resume(w, e, ref b, ref m); return; }
             }
 
-            // Leash for auto-engaged units: do not chase forever.
-            if (b.ResumeState == UnitState.Idle && u.Aggro != Aggro.Aggressive)
+            // Leash for auto-engaged units: do not chase forever (stand ground never chases).
+            if (b.ResumeState == UnitState.Idle && EffectiveAggro(u, b.Stance) != Aggro.Aggressive)
             {
                 FixVec2 pos = w.Positions.Get(e).Value;
-                if (!FixMath.WithinDistance(pos, b.LeashOrigin, u.LeashRange))
+                Fix64 leash = b.Stance == Stance.StandGround ? Fix64.Half : u.LeashRange;
+                if (!FixMath.WithinDistance(pos, b.LeashOrigin, leash))
                 {
                     b.TargetPos = b.LeashOrigin;
                     b.TargetEntity = 0;

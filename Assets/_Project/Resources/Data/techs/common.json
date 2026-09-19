@@ -36,7 +36,7 @@
       "kind": "tech",
       "age": "age.2",
       "researchedAt": [
-        "bld.towncenter"
+        "bld.market"
       ],
       "cost": {
         "wood": 150,
@@ -61,7 +61,7 @@
       "kind": "tech",
       "age": "age.2",
       "researchedAt": [
-        "bld.towncenter"
+        "bld.market"
       ],
       "cost": {
         "wood": 200
@@ -73,6 +73,122 @@
           "stat": "gather.res.mine",
           "op": "mul",
           "value": 1.15
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [],
+      "oncePerGame": true
+    },
+    {
+      "id": "tech.seed_drill",
+      "name": "Seed Drill",
+      "kind": "tech",
+      "age": "age.2",
+      "researchedAt": [
+        "bld.mill"
+      ],
+      "cost": {
+        "wood": 150,
+        "gold": 50
+      },
+      "researchSeconds": 40,
+      "effects": [
+        {
+          "target": "*",
+          "stat": "gather.res.farm",
+          "op": "mul",
+          "value": 1.2
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [],
+      "oncePerGame": true
+    },
+    {
+      "id": "tech.guard_infantry",
+      "name": "Guard Infantry",
+      "kind": "tech",
+      "age": "age.4",
+      "researchedAt": [
+        "bld.barracks"
+      ],
+      "cost": {
+        "wood": 600,
+        "gold": 600
+      },
+      "researchSeconds": 60,
+      "effects": [
+        {
+          "target": "tag.infantry",
+          "stat": "hp",
+          "op": "mul",
+          "value": 1.25
+        },
+        {
+          "target": "tag.infantry",
+          "stat": "attacks.*.damage",
+          "op": "mul",
+          "value": 1.25
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [
+        "tech.veteran_infantry"
+      ],
+      "oncePerGame": true
+    },
+    {
+      "id": "tech.guard_cavalry",
+      "name": "Guard Cavalry",
+      "kind": "tech",
+      "age": "age.4",
+      "researchedAt": [
+        "bld.stable"
+      ],
+      "cost": {
+        "wood": 600,
+        "gold": 600
+      },
+      "researchSeconds": 60,
+      "effects": [
+        {
+          "target": "tag.cavalry",
+          "stat": "hp",
+          "op": "mul",
+          "value": 1.25
+        },
+        {
+          "target": "tag.cavalry",
+          "stat": "attacks.*.damage",
+          "op": "mul",
+          "value": 1.25
+        }
+      ],
+      "spawns": [],
+      "prerequisites": [
+        "tech.veteran_cavalry"
+      ],
+      "oncePerGame": true
+    },
+    {
+      "id": "tech.heavy_shot",
+      "name": "Heavy Shot",
+      "kind": "tech",
+      "age": "age.4",
+      "researchedAt": [
+        "bld.foundry"
+      ],
+      "cost": {
+        "wood": 400,
+        "gold": 400
+      },
+      "researchSeconds": 50,
+      "effects": [
+        {
+          "target": "tag.artillery",
+          "stat": "attacks.*.damage",
+          "op": "mul",
+          "value": 1.3
         }
       ],
       "spawns": [],
@@ -324,6 +440,42 @@
         {
           "id": "unit.falconet",
           "count": 2
+        }
+      ],
+      "prerequisites": [],
+      "oncePerGame": false
+    },
+    {
+      "id": "ship.5_skirmishers",
+      "name": "5 Skirmishers",
+      "kind": "shipment",
+      "age": "age.2",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [],
+      "spawns": [
+        {
+          "id": "unit.skirmisher",
+          "count": 5
+        }
+      ],
+      "prerequisites": [],
+      "oncePerGame": false
+    },
+    {
+      "id": "ship.3_dragoons",
+      "name": "3 Dragoons",
+      "kind": "shipment",
+      "age": "age.3",
+      "researchedAt": [],
+      "cost": {},
+      "researchSeconds": 0,
+      "effects": [],
+      "spawns": [
+        {
+          "id": "unit.dragoon",
+          "count": 3
         }
       ],
       "prerequisites": [],

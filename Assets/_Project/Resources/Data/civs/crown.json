@@ -50,6 +50,7 @@
       "ship.700_food",
       "ship.5_musketeers",
       "ship.600_gold",
+      "ship.5_skirmishers",
       "ship.2_falconets"
     ],
     "deckSize": 8
@@ -59,7 +60,8 @@
     "preferredComp": [
       "unit.musketeer",
       "unit.hussar",
-      "unit.crossbowman"
+      "unit.skirmisher",
+      "unit.falconet"
     ]
   }
 }
