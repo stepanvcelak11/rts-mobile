@@ -44,6 +44,7 @@ export class Renderer {
     this.variant = new Uint8Array(w * h);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) this.variant[y * w + x] = hash2(x, y) % 6;
     this.ground = bakeGround(this.terrain, this.elev, w, h);
+    this.stamped = new Set();
     this.fogCanvas = offscreen(w, h);
     this.fogImage = this.fogCanvas.getContext("2d").createImageData(w, h);
     this.hasElevation = this.elev.some(v => v > 0);
@@ -117,6 +118,7 @@ export class Renderer {
     if (!buf || buf.length < 16 || !this.terrain) return;
 
     const ents = parseEntities(buf);
+    this.stampDecor(ents);
     this.drawGround();
     this.drawGhost(buf);
     this.drawRally(buf, ents);
@@ -131,7 +133,30 @@ export class Renderer {
     this.lastEnts = ents;
   }
 
-  /// Slow day/night cycle (8 minutes): a cool tint at night, warm at dusk. Purely cosmetic.
+  /// Forest floor under trees and trampled earth under buildings, painted once per entity into the
+  /// baked ground so the terrain stops looking like a flat lawn. Nodes arrive as they are explored.
+  stampDecor(ents) {
+    if (!this.ground || !this.stamped) return;
+    const g = this.ground.getContext("2d"), H = this.mapH;
+    for (const e of ents) {
+      if (this.stamped.has(e.id)) continue;
+      if (e.kind === 3 && (e.state === 0 || e.state === 1)) {           // tree / bush
+        this.stamped.add(e.id);
+        const cx = (e.x + e.a / 2) * CELL, cy = (H - e.y - e.b / 2) * CELL, r = CELL * (e.state === 0 ? 1.15 : 1.4);
+        const grad = g.createRadialGradient(cx, cy, 0, cx, cy, r);
+        grad.addColorStop(0, "rgba(40,60,25,0.5)"); grad.addColorStop(1, "rgba(40,60,25,0)");
+        g.fillStyle = grad; g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill();
+      } else if (e.kind === 2 && !(e.flags & 2)) {                        // finished building: trampled earth
+        this.stamped.add(e.id);
+        const cx = (e.x + e.a / 2) * CELL, cy = (H - e.y - e.b / 2) * CELL, rx = (e.a + 1.2) * CELL * 0.75, ry = (e.b + 1.2) * CELL * 0.75;
+        const grad = g.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rx, ry));
+        grad.addColorStop(0, "rgba(150,115,70,0.55)"); grad.addColorStop(0.7, "rgba(150,115,70,0.3)"); grad.addColorStop(1, "rgba(150,115,70,0)");
+        g.fillStyle = grad; g.beginPath(); g.ellipse(cx, cy, rx, ry, 0, 0, 7); g.fill();
+      }
+    }
+  }
+
+  /// Slow day/night cycle (8 minutes): a cool tint at night, warm at dusk, plus a soft vignette.
   drawDayNight() {
     const t = (this.time % 480) / 480;                 // 0 = noon, 0.5 = midnight
     const night = Math.max(0, Math.cos(t * Math.PI * 2) * -1);   // 0 by day, 1 at midnight
@@ -139,6 +164,12 @@ export class Renderer {
     const ctx = this.ctx;
     if (night > 0.02) { ctx.fillStyle = `rgba(10,20,60,${0.38 * night})`; ctx.fillRect(0, 0, innerWidth, innerHeight); }
     if (dusk > 0.02) { ctx.fillStyle = `rgba(255,140,60,${0.12 * dusk})`; ctx.fillRect(0, 0, innerWidth, innerHeight); }
+    if (!this.vignette || this.vignette.w !== innerWidth || this.vignette.h !== innerHeight) {
+      const v = ctx.createRadialGradient(innerWidth / 2, innerHeight / 2, Math.min(innerWidth, innerHeight) * 0.45, innerWidth / 2, innerHeight / 2, Math.max(innerWidth, innerHeight) * 0.8);
+      v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,0.42)");
+      this.vignette = { w: innerWidth, h: innerHeight, grad: v };
+    }
+    ctx.fillStyle = this.vignette.grad; ctx.fillRect(0, 0, innerWidth, innerHeight);
   }
 
   drawBirds(dt) {
@@ -367,6 +398,10 @@ export class Renderer {
     const scale = hw / BASE;
     const dw = sprite.width * scale, dh = sprite.height * scale;
     const top = sy - lift - dh + (e.a + e.b) * this.hh * 0.5;
+    if (e.state === 0 || e.state === 1 || e.state === 3) {   // tree, bush, mine: soft ground shadow
+      ctx.fillStyle = "rgba(0,0,0,0.18)";
+      ctx.beginPath(); ctx.ellipse(sx + hw * 0.15 * e.a, sy - lift + this.hh * 0.1, e.a * hw * 0.55, e.a * this.hh * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+    }
     ctx.drawImage(sprite, sx - dw / 2, top, dw, dh);
     this.hitRects.push({ id: e.id, x0: sx - dw * 0.4, y0: top + dh * 0.1, x1: sx + dw * 0.4, y1: top + dh, kind: 3, depth: depthKey(e) });
   }
@@ -665,6 +700,26 @@ function bakeGround(terrain, elev, W, H) {
       const nearWater = !land(x + 1, y) || !land(x - 1, y) || !land(x, y + 1) || !land(x, y - 1);
       if (nearWater) { g.fillStyle = "rgba(60,90,140,0.12)"; g.fillRect(px, py, CELL, CELL); }
     }
+    // Unique scatter per cell: broad colour patches, grass tufts, flowers, stones, logs.
+    const h = hash2(x * 7 + 3, y * 13 + 1), r = (h % 1000) / 1000, k = CELL / 16;
+    if (t === 0) {
+      if (h % 5 === 0) {   // soft colour patch (radial, so no visible tile grid)
+        const pr = CELL * (1.1 + r * 0.6), pg = g.createRadialGradient(px + CELL / 2, py + CELL / 2, 0, px + CELL / 2, py + CELL / 2, pr);
+        const col = (h >> 3) % 2 ? "110,170,80" : "55,105,48";
+        pg.addColorStop(0, `rgba(${col},0.3)`); pg.addColorStop(1, `rgba(${col},0)`);
+        g.fillStyle = pg; g.beginPath(); g.arc(px + CELL / 2, py + CELL / 2, pr, 0, 7); g.fill();
+      }
+      if (r < 0.14) { g.strokeStyle = "rgba(35,85,35,0.7)"; g.lineWidth = Math.max(1, k); const bx = px + (h % 7) * k * 2, by = py + ((h >> 4) % 7) * k * 2; for (let i = -1; i <= 1; i++) { g.beginPath(); g.moveTo(bx + i * k * 1.5, by + k * 3); g.lineTo(bx + i * k * 2.2, by - k * 2); g.stroke(); } }
+      else if (r < 0.19) { const fl = ["#f7e06a", "#f28fb0", "#ffffff", "#c9a6ff"][(h >> 5) % 4]; g.fillStyle = fl; for (let i = 0; i < 3; i++) g.fillRect(px + ((h >> (i * 3)) % 12) * k, py + ((h >> (i * 3 + 7)) % 12) * k, Math.max(1.5, k * 1.5), Math.max(1.5, k * 1.5)); }
+      else if (r < 0.215) { g.fillStyle = "#8b8783"; g.beginPath(); g.ellipse(px + CELL * 0.5, py + CELL * 0.6, k * 3.2, k * 2.2, 0, 0, 7); g.fill(); g.fillStyle = "rgba(255,255,255,0.25)"; g.beginPath(); g.ellipse(px + CELL * 0.45, py + CELL * 0.52, k * 1.6, k * 0.9, 0, 0, 7); g.fill(); }
+      else if (r < 0.222) { g.fillStyle = "#6b4a2c"; g.save(); g.translate(px + CELL / 2, py + CELL / 2); g.rotate(r * 6); g.fillRect(-k * 5, -k * 1.5, k * 10, k * 3); g.fillStyle = "#c9a37a"; g.fillRect(k * 4, -k * 1.5, k, k * 3); g.restore(); }
+    } else if (t === 2) {
+      if (r < 0.08) { g.fillStyle = "rgba(255,255,255,0.7)"; g.beginPath(); g.arc(px + (h % 12) * k, py + ((h >> 4) % 12) * k, k * 1.2, 0, 7); g.fill(); }
+      else if (r < 0.14) { g.fillStyle = "rgba(120,100,70,0.5)"; g.beginPath(); g.ellipse(px + CELL / 2, py + CELL / 2, k * 2.4, k * 1.6, r, 0, 7); g.fill(); }
+    } else if (t === 1) {
+      if (r < 0.12) { g.fillStyle = "rgba(70,110,50,0.55)"; g.beginPath(); g.ellipse(px + (h % 12) * k, py + ((h >> 4) % 12) * k, k * 2.5, k * 1.5, 0, 0, 7); g.fill(); }
+      else if (r < 0.18) { g.fillStyle = "#77706a"; g.beginPath(); g.ellipse(px + CELL / 2, py + CELL / 2, k * 2.2, k * 1.5, r, 0, 7); g.fill(); }
+    }
   }
   return c;
 }
@@ -768,13 +823,32 @@ function nodeSprite(kind, variant, size, hw, depleting) {
   g.scale(s, s);
   const cx = w / 2 / s, base = h / s - size * BASE * 0.5;
   const rnd = mulberry(variant * 7 + kind);
-  if (kind === 0) {           // tree: trunk + three foliage blobs
+  if (kind === 0 && variant === 1) {   // pine: pale trunk, three stacked dark layers with lit right edges
+    const th = BASE * (1.5 + rnd() * 0.3);
+    g.fillStyle = "#6b4a2c"; g.fillRect(cx - BASE * 0.08, base - th * 0.45, BASE * 0.16, th * 0.45);
+    const dark = depleting ? "#6f7a3a" : "#245c31", lit = depleting ? "#93a04a" : "#3f8a45";
+    for (let i = 0; i < 3; i++) {
+      const y0 = base - th * (0.3 + i * 0.22), w = BASE * (0.75 - i * 0.16), hgt = th * 0.34;
+      g.fillStyle = dark; g.beginPath(); g.moveTo(cx, y0 - hgt); g.lineTo(cx + w, y0); g.lineTo(cx - w, y0); g.closePath(); g.fill();
+      g.fillStyle = lit; g.beginPath(); g.moveTo(cx, y0 - hgt); g.lineTo(cx + w, y0); g.lineTo(cx + w * 0.15, y0); g.closePath(); g.fill();
+    }
+    g.fillStyle = "rgba(255,255,255,0.12)"; g.beginPath(); g.arc(cx, base - th * 0.98, BASE * 0.06, 0, 7); g.fill();
+  } else if (kind === 0 && variant === 2) {   // birch: slim white trunk, airy light canopy
+    const th = BASE * (1.35 + rnd() * 0.3);
+    g.fillStyle = "#e8e2d2"; g.fillRect(cx - BASE * 0.06, base - th * 0.7, BASE * 0.12, th * 0.7);
+    g.fillStyle = "#3a3a3a"; for (let i = 0; i < 4; i++) g.fillRect(cx - BASE * 0.06, base - th * (0.15 + i * 0.16), BASE * 0.07, 2);
+    const cols = depleting ? ["#a8b45a", "#c2c86a"] : ["#6fbd5a", "#9bd776"];
+    const blobs = [[-0.2, -th * 0.7, 0.3], [0.22, -th * 0.78, 0.28], [0, -th * 0.98, 0.3], [0.05, -th * 0.62, 0.26]];
+    blobs.forEach(([dx, dy, r], i) => { g.fillStyle = cols[i % 2]; g.beginPath(); g.arc(cx + dx * BASE, base + dy, r * BASE, 0, 7); g.fill(); });
+  } else if (kind === 0) {    // oak: thick trunk + foliage blobs
     const th = BASE * (1.1 + rnd() * 0.3);
-    g.fillStyle = "#5a3b21"; g.fillRect(cx - BASE * 0.09, base - th * 0.55, BASE * 0.18, th * 0.55);
+    g.fillStyle = "#5a3b21"; g.fillRect(cx - BASE * 0.1, base - th * 0.55, BASE * 0.2, th * 0.55);
+    g.fillStyle = "#4a2f18"; g.fillRect(cx - BASE * 0.1, base - th * 0.55, BASE * 0.07, th * 0.55);
     const cols = depleting ? ["#7d8f3a", "#95a54a", "#aab95a"] : ["#2f7d3a", "#3f9a47", "#58b35a"];
-    const blobs = [[0, -th * 0.55, 0.42], [-0.22, -th * 0.72, 0.34], [0.2, -th * 0.8, 0.36], [0, -th * 0.98, 0.3]];
+    const blobs = [[0, -th * 0.55, 0.45], [-0.24, -th * 0.72, 0.36], [0.22, -th * 0.8, 0.38], [0, -th * 0.98, 0.32]];
     blobs.forEach(([dx, dy, r], i) => { g.fillStyle = cols[Math.min(2, i)]; g.beginPath(); g.arc(cx + dx * BASE, base + dy, r * BASE, 0, 7); g.fill(); });
-    g.strokeStyle = "rgba(0,0,0,0.25)"; g.lineWidth = 1.2; g.beginPath(); g.arc(cx, base - th * 0.7, BASE * 0.55, 0, 7); g.stroke();
+    g.fillStyle = "rgba(255,255,255,0.14)"; g.beginPath(); g.arc(cx + BASE * 0.18, base - th * 0.92, BASE * 0.16, 0, 7); g.fill();
+    g.strokeStyle = "rgba(0,0,0,0.22)"; g.lineWidth = 1.2; g.beginPath(); g.arc(cx, base - th * 0.7, BASE * 0.58, 0, 7); g.stroke();
   } else if (kind === 1) {    // berry bush
     g.fillStyle = "#4c7a2a"; g.beginPath(); g.ellipse(cx, base - BASE * 0.35, BASE * 0.8, BASE * 0.5, 0, 0, 7); g.fill();
     g.fillStyle = "#5f9435"; g.beginPath(); g.ellipse(cx - BASE * 0.2, base - BASE * 0.5, BASE * 0.5, BASE * 0.35, 0, 0, 7); g.fill();

@@ -68,6 +68,9 @@ Verified: 10-minute Hard-vs-Hard match is deterministic (same hash twice), 468 h
   (`FindNearestReachableNode`), another drop-off when blocked. Gathering is now the AoE3 trickle:
   resources flow straight into the stockpile every tick (no cargo trips), lumber/mining camps
   are +25 % auras within 10 cells. 50 sim tests incl. `GatheringRobustnessTests`.
+- Look of the field: three tree species (oak, pine, birch) with ground shadows, forest floor and
+  trampled earth stamped into the baked ground, unique per-cell scatter (colour patches, tufts,
+  flowers, stones, logs, shells), soft vignette.
 
 ## Next (Phase 6 candidates)
 - Formations and group speed matching; hierarchical pathfinding for 128×128+ maps.
