@@ -1,0 +1,11 @@
+* text=auto
+*.cs text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.asmdef text eol=lf
+*.csproj text eol=lf
+*.py text eol=lf
+*.unity -text merge=unityyamlmerge
+*.asset -text merge=unityyamlmerge
+*.mat -text merge=unityyamlmerge
+*.prefab -text merge=unityyamlmerge
