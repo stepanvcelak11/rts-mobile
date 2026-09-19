@@ -21,3 +21,6 @@ MemoryCaptures/
 sim/**/bin/
 sim/**/obj/
 __pycache__/
+web-dist/
+[Bb]in/
+obj/

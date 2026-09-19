@@ -18,6 +18,12 @@ namespace RTS.Tests
             Assert.That(d.Buildings.Count, Is.GreaterThanOrEqualTo(5));
             Assert.AreEqual(1, d.Maps.Count);
             Assert.AreEqual(0.5m, d.NodeGatherRate("res.tree"));
+            // JSON arrays must replace field initialisers (a Newtonsoft default appends to them).
+            BuildingDef tc = d.Buildings[d.BuildingIndex("bld.towncenter")];
+            Assert.AreEqual(2, tc.footprint.Count);
+            Assert.AreEqual(6, tc.FootprintW);
+            Assert.AreEqual(3, tc.dropOff.Count);
+            Assert.AreEqual(3, tc.placement.terrain.Count);
             Assert.AreEqual(d.ResourceIndex("wood"), d.NodeResourceIndex("res.tree"));
         }
 
@@ -61,6 +67,9 @@ namespace RTS.Tests
             World w = m.World;
             Assert.AreEqual(2, w.Players.Length);
             Assert.AreEqual(1, w.CountBuildings(0, w.Defs.Data.BuildingIndex("bld.towncenter"), true));
+            int tcEntity = w.FindBuilding(0, w.Defs.Data.BuildingIndex("bld.towncenter"));
+            Assert.AreEqual(6, w.Footprints.Get(tcEntity).W);
+            Assert.IsFalse(w.Map.IsPassable(13, 13), "town center occupies its 6x6 footprint");
             Assert.AreEqual(1, w.CountBuildings(1, w.Defs.Data.BuildingIndex("bld.towncenter"), true));
             Assert.AreEqual(6, TestWorld.UnitsOf(w, 0, "unit.villager").Length);
             Assert.AreEqual(6, w.Players[0].Population);

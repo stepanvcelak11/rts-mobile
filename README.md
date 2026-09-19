@@ -5,6 +5,9 @@ base building, four Ages, asymmetric civilizations with Home-City shipments,
 tactical real-time combat. Singleplayer skirmish + campaign; multiplayer-ready
 (deterministic lockstep).
 
+**Play it in the browser: https://stepanvcelak11.github.io/rts-mobile/** (phone or desktop;
+the same C# simulation compiled to WebAssembly, see `web/`).
+
 | Doc | What it covers |
 |---|---|
 | [docs/01-ARCHITECTURE.md](docs/01-ARCHITECTURE.md) | Engine choice, layers, tick model, determinism, folder structure |
@@ -39,6 +42,15 @@ python tools/validate_data.py                   # schema + cross-reference check
 python tools/check_deps.py                      # Sim/Data/Net stay engine-free
 ```
 
+### Web build (what the link above runs)
+```
+dotnet publish web/RTS.Web/RTS.Web.csproj -c Release -o web-dist
+python tools/smoke_web.py            # headless Playwright: boots, plays, checks for JS errors
+```
+`web/RTS.Web` hosts the simulation in Blazor WebAssembly; `wwwroot/game.js` is the canvas
+renderer + gesture layer + HTML HUD. Pushes to `main` run the tests and deploy to GitHub Pages
+(`.github/workflows/deploy.yml`).
+
 ### Unity
 1. Open the folder in Unity 6000.0 LTS (Unity Hub → Add). Packages restore from
    `Packages/manifest.json`; accept the prompt to enable the **Input System** backend.
@@ -71,5 +83,6 @@ Assets/_Project/
   Scripts/Editor      scene builder, URP setup, data validator
   Tests/EditMode/Sim  NUnit tests (run in Unity Test Runner or via sim/tests)
 sim/                  csproj files for dotnet build/test
-tools/                validate_data.py, check_deps.py
+web/RTS.Web           browser build (Blazor WASM host + canvas renderer)
+tools/                gen_data.py, validate_data.py, check_deps.py, smoke_web.py, serve_web.py
 ```

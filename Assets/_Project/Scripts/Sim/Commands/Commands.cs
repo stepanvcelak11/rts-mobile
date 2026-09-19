@@ -184,9 +184,9 @@ namespace RTS.Sim.Commands
             if (buildingIndex < 0 || buildingIndex >= defs.Buildings.Length) return PlacementResult.OutOfBounds;
             BakedBuilding b = defs.Buildings[buildingIndex];
             if (b.Age > w.Players[player].Age) return PlacementResult.WrongAge;
+            if (b.Limit > 0 && w.CountBuildings(player, buildingIndex, includeSites: true) >= b.Limit) return PlacementResult.LimitReached;
             PlacementResult r = w.Map.Validate(x, y, b.W, b.H, b.TerrainMask);
             if (r != PlacementResult.Ok) return r;
-            if (b.Limit > 0 && w.CountBuildings(player, buildingIndex, includeSites: true) >= b.Limit) return PlacementResult.LimitReached;
             if (!w.Players[player].CanAfford(b.Cost)) return PlacementResult.NotAffordable;
             return PlacementResult.Ok;
         }

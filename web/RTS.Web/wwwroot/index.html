@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#141922" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Two Rivers — mobile RTS</title>
+  <base href="/" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="hud" class="hidden">
+    <div id="top">
+      <span class="chip food" id="food">Food 0</span>
+      <span class="chip wood" id="wood">Wood 0</span>
+      <span class="chip gold" id="gold">Gold 0</span>
+      <span class="chip pop" id="pop">0/0</span>
+      <span class="chip age" id="age">Age I</span>
+      <button class="btn small" id="shipBtn">Shipments</button>
+    </div>
+    <canvas id="minimap" width="128" height="128"></canvas>
+    <div id="toast" class="hidden"></div>
+    <button id="attackPing" class="btn danger hidden">Under attack! — Go</button>
+    <button id="idleBtn" class="btn green">Idle</button>
+    <div id="sheet">
+      <div id="label">…</div>
+      <div id="cards"></div>
+      <div id="actions"></div>
+    </div>
+    <div id="drawer" class="hidden"></div>
+    <div id="radial" class="hidden"></div>
+    <div id="box" class="hidden"></div>
+    <div id="end" class="hidden">
+      <h1 id="endTitle">Victory</h1>
+      <p id="endStats"></p>
+      <button class="btn" id="againBtn">Play again</button>
+    </div>
+  </div>
+
+  <div id="menu">
+    <div class="card">
+      <h1>Two Rivers</h1>
+      <p class="sub">A mobile real-time strategy skirmish. Gather, build, age up, and raze the enemy town center.</p>
+      <h2>Your civilization</h2>
+      <div id="civs"></div>
+      <h2>Opponent</h2>
+      <div class="row">
+        <label><input type="radio" name="diff" value="1" /> Easy</label>
+        <label><input type="radio" name="diff" value="2" checked /> Normal</label>
+        <label><input type="radio" name="diff" value="3" /> Hard</label>
+      </div>
+      <button class="btn big" id="playBtn" disabled>Loading engine…</button>
+      <p class="hint">Tap to select · tap again for the same type · hold and drag to box-select · hold still for orders · drag to pan · pinch or wheel to zoom</p>
+    </div>
+  </div>
+
+  <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+  <script type="module" src="game.js"></script>
+</body>
+</html>

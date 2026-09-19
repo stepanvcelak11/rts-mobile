@@ -1,0 +1,51 @@
+name: Test and deploy web build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Validate data and layering
+        run: |
+          python3 tools/validate_data.py
+          python3 tools/check_deps.py
+      - name: Simulation tests
+        run: dotnet test sim/tests/RTS.Sim.Tests.csproj --nologo
+      - name: Publish web build
+        run: dotnet publish web/RTS.Web/RTS.Web.csproj -c Release -o web-dist --nologo
+      - name: Prepare Pages artifact
+        run: |
+          REPO="${GITHUB_REPOSITORY#*/}"
+          sed -i "s|<base href=\"/\" />|<base href=\"/${REPO}/\" />|" web-dist/wwwroot/index.html
+          touch web-dist/wwwroot/.nojekyll
+          cp web-dist/wwwroot/index.html web-dist/wwwroot/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web-dist/wwwroot
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

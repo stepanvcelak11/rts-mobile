@@ -49,6 +49,8 @@ namespace RTS.Data
             FloatParseHandling = FloatParseHandling.Decimal,
             MissingMemberHandling = MissingMemberHandling.Ignore,
             NullValueHandling = NullValueHandling.Include,
+            // Replace, not append: a field initialised as `new List<int> { 1, 1 }` must become [6, 6], not [1, 1, 6, 6].
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
         };
 
         public static GameData Load(IDataSource source)
